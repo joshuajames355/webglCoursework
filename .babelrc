@@ -1,7 +1,0 @@
-{
-    "presets": ["@babel/preset-env", ["@babel/typescript",{"isTSX": true, "allExtensions": true}]],
-    "plugins": [
-      "transform-class-properties",
-      "@babel/plugin-syntax-dynamic-import"
-    ]
-  }
