@@ -13,6 +13,10 @@ module.exports = {
     module: {
       rules: [
         {
+          test: /\.glsl$/,
+          loader: 'ts-shader-loader'
+        },
+        {
           test: /\.ts?$/,
           exclude: /node_modules/,
           use: {
