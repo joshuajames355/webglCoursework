@@ -1,7 +1,9 @@
-import { Cube, Triangle } from "./simpleMesh";
+import { Triangle } from "./simpleMesh";
+import ShaderProgram from "./shaders";
 
 const fragmentSource : string = require("./shaders/fragment.glsl").default;
 const vertexSource : string = require("./shaders/vertex.glsl").default;
+
 
 function main()
 {
@@ -24,38 +26,7 @@ function main()
     }
 
     var cube = new Triangle(gl);
-
-    var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-    if(fragmentShader == null)
-    {
-        el.innerHTML="Erorr";
-        return;
-    }
-    gl.shaderSource(fragmentShader, fragmentSource);
-    gl.compileShader(fragmentShader);
-    console.log(gl.getShaderInfoLog(fragmentShader));
-
-    var vertexShader = gl.createShader(gl.VERTEX_SHADER);
-    if(vertexShader == null)
-    {
-        el.innerHTML="Erorr";
-        return;
-    }
-    gl.shaderSource(vertexShader, vertexSource);
-    gl.compileShader(vertexShader);
-    console.log(gl.getShaderInfoLog(vertexShader));
-
-    var program = gl.createProgram();
-    if(program == null)
-    {
-        el.innerHTML="Erorr";
-        return;
-    }
-    console.log(vertexSource)
-
-    gl.attachShader(program, vertexShader);
-    gl.attachShader(program, fragmentShader);
-    gl.linkProgram(program);
+    var shader = new ShaderProgram(gl, vertexSource, fragmentSource);
 
     gl.enable(gl.DEPTH_TEST);
 
@@ -66,21 +37,8 @@ function main()
 
 
     //Render cube
-    gl.useProgram(program);
+    shader.use(gl);
     cube.render(gl);  
-}
-
-function mainLoop(gl : WebGL2RenderingContext)
-{
-    // Set clear color to black, fully opaque
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
-    // Clear the color buffer with specified clear color
-    gl.clear(gl.COLOR_BUFFER_BIT);
-
-
-    //Render cube
-    //gl.useProgram(program);
-    //cube.render(gl);    
 }
 
 window.onload = main;
