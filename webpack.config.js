@@ -13,16 +13,19 @@ module.exports = {
     module: {
       rules: [
         {
-          test: /\.glsl$/,
-          loader: 'ts-shader-loader'
-        },
-        {
           test: /\.ts?$/,
           exclude: /node_modules/,
           use: {
             loader: "awesome-typescript-loader"
           }
-        }
+        },
+        {
+          test: /\.glsl$/,
+          loader: 'raw-loader',
+          options: {
+            esModule: false,
+          }
+        },
       ]
     }
   };

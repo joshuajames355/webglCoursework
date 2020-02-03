@@ -3,10 +3,10 @@ import ShaderProgram from "./shaders";
 import RenderObject from "./renderObject";
 import { mat4 } from "gl-matrix";
 
-//Contains some example objects and components
+const fragmentSource = require("./shaders/fragment.glsl");
+const vertexSource = require("./shaders/vertex.glsl");
 
-const fragmentSource : string = require("./shaders/fragment.glsl").default;
-const vertexSource : string = require("./shaders/vertex.glsl").default;
+//Contains some example objects and components
 
 //Objects--------------------------------------------------------------------------
 
