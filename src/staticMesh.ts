@@ -1,4 +1,6 @@
-export default class Mesh //A base class for meshes
+import RenderableComponent from "./renderableComponent";
+
+export default class StaticMesh extends RenderableComponent //A base class for meshes
 {
     vertices: number[] = []; //3 values for each - x, y, z 
     indices: number[] = [];
@@ -12,8 +14,6 @@ export default class Mesh //A base class for meshes
 
     protected setupVAO(gl : WebGL2RenderingContext)
     {
-        console.log(this.vertices)
-
         var newVBO = gl.createBuffer();
         if(newVBO == null)
         {
@@ -59,12 +59,11 @@ export default class Mesh //A base class for meshes
         this.hasDoneSetup = true;
     }
 
-    render(gl : WebGL2RenderingContext)
-    {
+    drawVertices(gl : WebGL2RenderingContext)
+    { 
         if(!this.hasDoneSetup) this.setupVAO(gl);
 
         gl.bindVertexArray(this.vao);
-        console.log(this.indices)
         gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
         gl.bindVertexArray(null);
     }

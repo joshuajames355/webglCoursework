@@ -1,8 +1,13 @@
+import { mat4 } from "gl-matrix";
+
 export default class ShaderProgram
 {
     program : WebGLProgram;
     vertexShader : WebGLShader;
     fragmentShader : WebGLShader;
+
+    modelViewLoc : WebGLUniformLocation | null = null;
+    modelViewProjectionLoc : WebGLUniformLocation | null = null;
 
     constructor(gl : WebGL2RenderingContext, vertexSource : string, shaderSource : string)
     {
@@ -46,10 +51,26 @@ export default class ShaderProgram
         gl.attachShader(this.program, this.vertexShader);
         gl.attachShader(this.program, this.fragmentShader);
         gl.linkProgram(this.program);
+
+        this.modelViewProjectionLoc =  gl.getUniformLocation(this.program, "modelViewProjection");
+        this.modelViewLoc = gl.getUniformLocation(this.program, "modelView");
     }
 
     use(gl : WebGL2RenderingContext)
     {
         gl.useProgram(this.program);
+    }
+
+    bindUniforms(gl : WebGL2RenderingContext, modelView : mat4, modelViewprojection : mat4)
+    {
+        if(this.modelViewProjectionLoc)
+        {
+            gl.uniformMatrix4fv(this.modelViewProjectionLoc, false, modelViewprojection);
+        }
+        
+        if(this.modelViewLoc)
+        {
+            gl.uniformMatrix4fv(this.modelViewLoc, false, modelView);
+        }
     }
 }

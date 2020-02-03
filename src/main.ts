@@ -1,8 +1,7 @@
-import { Triangle } from "./simpleMesh";
 import ShaderProgram from "./shaders";
-
-const fragmentSource : string = require("./shaders/fragment.glsl").default;
-const vertexSource : string = require("./shaders/vertex.glsl").default;
+import { CubeObject } from "./simpleMesh";
+import { vec3, mat4 } from "gl-matrix";
+import FlyingCamera from "./flyingCamera";
 
 
 function main()
@@ -25,20 +24,53 @@ function main()
         return;
     }
 
-    var cube = new Triangle(gl);
-    var shader = new ShaderProgram(gl, vertexSource, fragmentSource);
+    var game = new Game(gl);
+    game.tick();
+}
 
-    gl.enable(gl.DEPTH_TEST);
+class Game
+{
+    camera : FlyingCamera;
+    cube : CubeObject;
+    gl : WebGL2RenderingContext;
 
-    // Set clear color to black, fully opaque
-    gl.clearColor(0.0, 0.0, 0.5, 1.0);
-    // Clear the color buffer with specified clear color
-    gl.clear(gl.COLOR_BUFFER_BIT);
+    lastFrameTime : number;
+
+    constructor(gl : WebGL2RenderingContext)
+    {
+        this.camera = new FlyingCamera();
+
+        this.cube = new CubeObject(gl);
+        this.cube.move(vec3.fromValues(0, 0, -5));
+
+        this.gl = gl;
+
+        this.lastFrameTime = Math.round((new Date()).getTime() / 1000);
+    }
 
 
-    //Render cube
-    shader.use(gl);
-    cube.render(gl);  
+    tick()
+    {
+        var time = Math.round((new Date()).getTime() / 1000);
+        var deltaTime = time - this.lastFrameTime;
+        this.lastFrameTime = time;
+
+        var view : mat4 = this.camera.getViewMatrix();
+        var projection : mat4 = this.camera.getProjectionMatrix();
+
+        console.log("VIEW: ")
+        console.log(projection);
+
+        this.gl.enable(this.gl.DEPTH_TEST);
+        // Set clear color to black, fully opaque
+        this.gl.clearColor(0.0, 0.0, 0.5, 1.0);
+        // Clear the color buffer with specified clear color
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT  | this.gl.DEPTH_BUFFER_BIT);
+
+        this.cube.render(this.gl, view, projection);  
+
+        requestAnimationFrame(this.tick.bind(this));
+    }
 }
 
 window.onload = main;
