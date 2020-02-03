@@ -52,7 +52,18 @@ export default class GameObject
         vec3.add(this.position, this.position, delta);
         this.hasPosChanged = true;
     }
-
+    moveForward(amount : number)
+    {
+        var forward = vec3.fromValues(0, 0, -amount);
+        vec3.transformQuat(forward, forward, this.rotation);
+        this.move(forward);
+    }
+    moveRight(amount : number)
+    {
+        var right = vec3.fromValues(-amount, 0, 0);
+        vec3.transformQuat(right, right, this.rotation);
+        this.move(right);
+    }
     addAngle(delta : quat)
     {
         quat.add(this.rotation, this.rotation, delta);

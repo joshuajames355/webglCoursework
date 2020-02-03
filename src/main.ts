@@ -1,5 +1,4 @@
-import ShaderProgram from "./shaders";
-import { CubeObject, GunObject } from "./simpleMesh";
+import { GunObject } from "./simpleMesh";
 import { vec3, mat4 } from "gl-matrix";
 import FlyingCamera from "./flyingCamera";
 
@@ -15,6 +14,10 @@ function main()
         el.innerHTML="Erorr";
         return;
     }
+
+    canvas.onclick = () => {
+        canvas.requestPointerLock()};
+
 
     const gl : WebGL2RenderingContext | null = canvas.getContext("webgl2");
 
@@ -41,7 +44,7 @@ class Game
         this.camera = new FlyingCamera();
 
         this.cube = new GunObject(gl);
-        this.cube.move(vec3.fromValues(0, 0, -5));
+        this.cube.move(vec3.fromValues(0, 0, -10 ));
 
         this.gl = gl;
 

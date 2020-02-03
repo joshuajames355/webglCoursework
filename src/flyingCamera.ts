@@ -3,11 +3,17 @@ import { vec3 } from "gl-matrix";
 
 export default class FlyingCamera extends PerspectiveCamera
 {
+    movementSensitivity : number;
+    aimSensitivity : number;
     constructor(width : number = 640, height : number = 480, fov: number = 45, nearPlane : number = 0.1, farPlane: number = 100)
     {
         super(width, height, fov, nearPlane, farPlane);
 
+        this.movementSensitivity = 1;
+        this.aimSensitivity = 0.1;
+
         window.addEventListener("keydown", this.onKeyDown.bind(this));
+        window.addEventListener("mousemove", this.onMouseMove.bind(this));
     }
 
     onKeyDown(event : KeyboardEvent)
@@ -15,16 +21,16 @@ export default class FlyingCamera extends PerspectiveCamera
         switch(event.key)
         {
             case "w":
-                this.move(vec3.fromValues(0, 0, -1));
+                this.moveForward(this.movementSensitivity);
                 break;
             case "s":
-                this.move(vec3.fromValues(0, 0, 1));
+                this.moveForward(-this.movementSensitivity);
                 break;
             case "a":
-                this.move(vec3.fromValues(-1, 0, 0));
+                this.moveRight(this.movementSensitivity);
                 break;
             case "d":
-                this.move(vec3.fromValues(1, 0, 0));
+                this.moveRight(-this.movementSensitivity);
                 break;
             case " ":
                 this.move(vec3.fromValues(0, 1, 0));
@@ -34,5 +40,11 @@ export default class FlyingCamera extends PerspectiveCamera
                 this.move(vec3.fromValues(0, -1, 0));
                 break;
         }
+    }
+
+    onMouseMove(event : MouseEvent)
+    {
+        this.rotateY(-this.aimSensitivity * event.movementX);
+        this.rotateX(-this.aimSensitivity * event.movementY);
     }
 }
