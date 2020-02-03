@@ -20,7 +20,7 @@ module.exports = {
           }
         },
         {
-          test: /\.glsl$/,
+          test: /\.glsl$|\.obj$/,
           loader: 'raw-loader',
           options: {
             esModule: false,

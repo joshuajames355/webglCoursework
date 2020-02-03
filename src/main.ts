@@ -1,5 +1,5 @@
 import ShaderProgram from "./shaders";
-import { CubeObject } from "./simpleMesh";
+import { CubeObject, GunObject } from "./simpleMesh";
 import { vec3, mat4 } from "gl-matrix";
 import FlyingCamera from "./flyingCamera";
 
@@ -31,7 +31,7 @@ function main()
 class Game
 {
     camera : FlyingCamera;
-    cube : CubeObject;
+    cube : GunObject;
     gl : WebGL2RenderingContext;
 
     lastFrameTime : number;
@@ -40,7 +40,7 @@ class Game
     {
         this.camera = new FlyingCamera();
 
-        this.cube = new CubeObject(gl);
+        this.cube = new GunObject(gl);
         this.cube.move(vec3.fromValues(0, 0, -5));
 
         this.gl = gl;
@@ -57,9 +57,6 @@ class Game
 
         var view : mat4 = this.camera.getViewMatrix();
         var projection : mat4 = this.camera.getProjectionMatrix();
-
-        console.log("VIEW: ")
-        console.log(projection);
 
         this.gl.enable(this.gl.DEPTH_TEST);
         // Set clear color to black, fully opaque
