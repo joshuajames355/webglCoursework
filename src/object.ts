@@ -1,6 +1,5 @@
 import { vec3, quat, mat4 } from "gl-matrix";
 
-
 //Any object with a Position.
 export default class GameObject
 {
@@ -19,6 +18,10 @@ export default class GameObject
         mat4.invert(this.modelMatInverse, this.modelMat);
     }
 
+    tick(deltaTime : number)
+    {
+
+    }
     getModelMatrix() : mat4
     {
         if(this.hasPosChanged)
@@ -28,7 +31,6 @@ export default class GameObject
         }
         return this.modelMat;
     }
-
     getModelMatrixInverse() : mat4
     {
         if(this.hasPosChanged)
@@ -49,7 +51,26 @@ export default class GameObject
     {
         vec3.add(this.position, this.position, delta);
         this.hasPosChanged = true;
+    }
 
-        console.log(this.position)
+    addAngle(delta : quat)
+    {
+        quat.add(this.rotation, this.rotation, delta);
+        this.hasPosChanged = true;
+    }
+    rotateX(degrees : number)
+    {
+        quat.rotateX(this.rotation, this.rotation, degrees * 0.01745329251);
+        this.hasPosChanged = true;
+    }
+    rotateY(degrees : number)
+    {
+        quat.rotateY(this.rotation, this.rotation, degrees * 0.01745329251);
+        this.hasPosChanged = true;
+    }
+    rotateZ(degrees : number)
+    {
+        quat.rotateZ(this.rotation, this.rotation, degrees * 0.01745329251);
+        this.hasPosChanged = true;
     }
 }

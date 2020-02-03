@@ -45,13 +45,13 @@ class Game
 
         this.gl = gl;
 
-        this.lastFrameTime = Math.round((new Date()).getTime() / 1000);
+        this.lastFrameTime = (new Date()).getTime() / 1000;
     }
 
 
     tick()
     {
-        var time = Math.round((new Date()).getTime() / 1000);
+        var time = (new Date()).getTime() / 1000;
         var deltaTime = time - this.lastFrameTime;
         this.lastFrameTime = time;
 
@@ -65,6 +65,7 @@ class Game
         this.gl.clear(this.gl.COLOR_BUFFER_BIT  | this.gl.DEPTH_BUFFER_BIT);
 
         this.cube.render(this.gl, view, projection);  
+        this.cube.tick(deltaTime);
 
         requestAnimationFrame(this.tick.bind(this));
     }

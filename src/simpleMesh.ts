@@ -45,6 +45,12 @@ export class GunObject extends RenderObject
     {
         this.gun.render(gl, this.getModelMatrix(), viewMatrix, projectionMatrix);
     }
+
+    tick(deltatime : number)
+    {
+        console.log(deltatime);
+        this.rotateY(10 * deltatime);
+    }
 }
 
 //Components-----------------------------------------------------------------------------------
