@@ -48,9 +48,16 @@ export default class StaticMesh extends RenderableComponent //A base class for m
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ebo);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW)
 
-        //bind Position attribute
+        //bind Position attributes
+        //pos
         gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 8*4, 0);
         gl.enableVertexAttribArray(0);
+        //normals
+        gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 8*4, 3*4);
+        gl.enableVertexAttribArray(0);
+        //uvs
+        gl.vertexAttribPointer(2, 2, gl.FLOAT, false, 8*4, 6*4);
+        gl.enableVertexAttribArray(2);
         
         gl.bindVertexArray(null);
         
@@ -101,7 +108,7 @@ export default class StaticMesh extends RenderableComponent //A base class for m
             if (line.startsWith("vt")) //Texture coordinate
             {
                 //imports a texture coord
-                var uv = line.substr(2).split(" ").map((x : string) => parseFloat(x));
+                var uv = line.substr(3).split(" ").map((x : string) => parseFloat(x));
                 uv.splice(2);
                 uv = uv.map((x : number) => isNaN(x) ? 0 : x);
                 textureCoords.push(uv);

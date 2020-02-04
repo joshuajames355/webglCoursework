@@ -1,4 +1,4 @@
-import { GunObject } from "./simpleMesh";
+import { GunObject, ButtonObject } from "./simpleMesh";
 import { vec3, mat4 } from "gl-matrix";
 import FlyingCamera from "./flyingCamera";
 
@@ -36,12 +36,14 @@ class Game
     camera : FlyingCamera;
     cube : GunObject;
     gl : WebGL2RenderingContext;
+    button : ButtonObject;
 
     lastFrameTime : number;
 
     constructor(gl : WebGL2RenderingContext)
     {
         this.camera = new FlyingCamera();
+        this.button = new ButtonObject(gl);
 
         this.cube = new GunObject(gl);
         this.cube.move(vec3.fromValues(0, 0, -10 ));
@@ -66,6 +68,8 @@ class Game
         this.gl.clearColor(0.0, 0.0, 0.5, 1.0);
         // Clear the color buffer with specified clear color
         this.gl.clear(this.gl.COLOR_BUFFER_BIT  | this.gl.DEPTH_BUFFER_BIT);
+
+        this.button.render(this.gl, view, projection);
 
         this.cube.render(this.gl, view, projection);  
         this.cube.tick(deltaTime);

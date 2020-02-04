@@ -26,6 +26,10 @@ module.exports = {
             esModule: false,
           }
         },
+        {
+          test: /\.png$/,
+          loader: 'file-loader'
+        },
       ]
     }
   };

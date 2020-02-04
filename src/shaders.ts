@@ -1,4 +1,5 @@
 import { mat4 } from "gl-matrix";
+import { Texture } from "./texture";
 
 export default class ShaderProgram
 {
@@ -9,7 +10,9 @@ export default class ShaderProgram
     modelViewLoc : WebGLUniformLocation | null = null;
     modelViewProjectionLoc : WebGLUniformLocation | null = null;
 
-    constructor(gl : WebGL2RenderingContext, vertexSource : string, shaderSource : string)
+    diffuseMap : Texture | null;
+    diffuseMapLoc : WebGLUniformLocation | null;
+    constructor(gl : WebGL2RenderingContext, vertexSource : string, shaderSource : string, diffuseMap? : Texture)
     {
         var newVertexShader = gl.createShader(gl.VERTEX_SHADER);
         if(newVertexShader == null)
@@ -54,11 +57,21 @@ export default class ShaderProgram
 
         this.modelViewProjectionLoc =  gl.getUniformLocation(this.program, "modelViewProjection");
         this.modelViewLoc = gl.getUniformLocation(this.program, "modelView");
+
+        
+        this.diffuseMap = diffuseMap == undefined ? null : diffuseMap;
+        this.diffuseMapLoc = gl.getUniformLocation(this.program, "diffuseMap");
     }
 
     use(gl : WebGL2RenderingContext)
     {
         gl.useProgram(this.program);
+        if(this.diffuseMap != null && this.diffuseMapLoc != null){
+            //using texture unit 0 for diffuse maps
+            gl.activeTexture(gl.TEXTURE0);
+            this.diffuseMap.bindTexture();
+            gl.uniform1i(this.diffuseMapLoc, 0);
+        }
     }
 
     bindUniforms(gl : WebGL2RenderingContext, modelView : mat4, modelViewprojection : mat4)

@@ -1,5 +1,7 @@
 #version 300 es
 
+in highp vec2 uvCoord;
+
 out lowp vec4 color;
 
 void main()

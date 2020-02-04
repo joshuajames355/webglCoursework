@@ -1,12 +1,18 @@
 import Mesh from "./staticMesh";
 import ShaderProgram from "./shaders";
 import RenderObject from "./renderObject";
-import { mat4 } from "gl-matrix";
+import { mat4, vec3 } from "gl-matrix";
 import StaticMesh from "./staticMesh";
+import { Texture } from "./texture";
 
 const fragmentSource = require("./shaders/fragment.glsl");
+const fragmentTextureSource = require("./shaders/fragmentTexture.glsl");
 const vertexSource = require("./shaders/vertex.glsl");
 const gunModel = require("./assets/M82.obj");
+
+const buttonModel = require("./assets/Button.obj");
+const buttonTexture = require("./assets/ButtonTexture.png").default;
+
 
 //Contains some example objects and components
 
@@ -27,7 +33,6 @@ export class CubeObject extends RenderObject
     {
         this.mesh1.render(gl, this.getModelMatrix(), viewMatrix, projectionMatrix);
     }
-
 }
 
 export class GunObject extends RenderObject
@@ -48,8 +53,29 @@ export class GunObject extends RenderObject
 
     tick(deltatime : number)
     {
-        console.log(deltatime);
         this.rotateY(10 * deltatime);
+    }
+}
+
+export class ButtonObject extends RenderObject
+{
+    button : StaticMesh;
+    buttonTexture : Texture;
+
+    constructor(gl : WebGL2RenderingContext)
+    {
+        super();
+
+        this.buttonTexture = new Texture(gl, buttonTexture);
+        this.button = StaticMesh.fromOBJ(buttonModel, new ShaderProgram(gl,vertexSource, fragmentTextureSource, this.buttonTexture));
+
+        this.move(vec3.fromValues(-4, 4, -15));
+        this.rotateX(90);
+    }
+
+    render(gl : WebGL2RenderingContext ,viewMatrix : mat4, projectionMatrix : mat4)
+    {
+        this.button.render(gl, this.getModelMatrix(), viewMatrix, projectionMatrix);
     }
 }
 

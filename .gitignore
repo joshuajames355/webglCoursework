@@ -84,6 +84,7 @@ dist/main.js
 dist/main.js.map
 dist/*.js
 dist/*.js.map
+dist/*.png
 
 #vscode
 .vscode
