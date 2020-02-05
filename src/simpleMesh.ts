@@ -4,15 +4,12 @@ import RenderObject from "./renderObject";
 import { mat4, vec3 } from "gl-matrix";
 import StaticMesh from "./staticMesh";
 import { Texture } from "./texture";
+import { Skybox } from "./skybox";
 
 const fragmentSource = require("./shaders/fragment.glsl");
 const fragmentTextureSource = require("./shaders/fragmentTexture.glsl");
 const vertexSource = require("./shaders/vertex.glsl");
 const gunModel = require("./assets/M82.obj");
-
-const buttonModel = require("./assets/Button.obj");
-const buttonTexture = require("./assets/ButtonTexture.png").default;
-
 
 //Contains some example objects and components
 
@@ -57,6 +54,9 @@ export class GunObject extends RenderObject
     }
 }
 
+const buttonModel = require("./assets/Button.obj");
+const buttonTexture = require("./assets/ButtonTexture.png").default;
+
 export class ButtonObject extends RenderObject
 {
     button : StaticMesh;
@@ -68,14 +68,27 @@ export class ButtonObject extends RenderObject
 
         this.buttonTexture = new Texture(gl, buttonTexture);
         this.button = StaticMesh.fromOBJ(buttonModel, new ShaderProgram(gl,vertexSource, fragmentTextureSource, this.buttonTexture));
-
-        this.move(vec3.fromValues(-4, 4, -15));
-        this.rotateX(90);
     }
 
     render(gl : WebGL2RenderingContext ,viewMatrix : mat4, projectionMatrix : mat4)
     {
         this.button.render(gl, this.getModelMatrix(), viewMatrix, projectionMatrix);
+    }
+}
+
+const image1 = require("./assets/skybox/skyrender0001.png").default;
+const image2 = require("./assets/skybox/skyrender0002.png").default;
+const image3 = require("./assets/skybox/skyrender0003.png").default;
+const image4 = require("./assets/skybox/skyrender0004.png").default;
+const image5 = require("./assets/skybox/skyrender0005.png").default;
+const image6 = require("./assets/skybox/skyrender0006.png").default;
+
+export class SkyboxExample extends Skybox
+{
+    constructor(gl : WebGL2RenderingContext)
+    {
+        var images = [image4, image1, image3, image6, image2, image5]
+        super(gl, images);
     }
 }
 

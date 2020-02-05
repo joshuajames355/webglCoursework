@@ -14,14 +14,8 @@ export default abstract class RenderableComponent
 
     render(gl : WebGL2RenderingContext, modelMatrix : mat4, viewMatrix : mat4, projectionMatrix : mat4)
     {
-        var modelView : mat4 = mat4.create();
-        mat4.mul(modelView, viewMatrix, modelMatrix);
-
-        var modelViewProjection : mat4 = mat4.create();
-        mat4.mul(modelViewProjection, projectionMatrix, modelView);
-
         this.shader.use(gl);
-        this.shader.bindUniforms(gl, modelView, modelViewProjection);
+        this.shader.bindUniforms(gl, modelMatrix, viewMatrix, projectionMatrix);
         this.drawVertices(gl);
     }
 

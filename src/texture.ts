@@ -1,10 +1,20 @@
-export class Texture
+export class BaseTexture
+{
+    bindTexture()
+    {
+
+    }
+}
+
+export class Texture extends BaseTexture
 {
     id : WebGLTexture;
     src : string;
     gl : WebGL2RenderingContext;
     constructor(gl : WebGL2RenderingContext, filename : string)
     {
+        super();
+
         var textureId = gl.createTexture();
         if (textureId == null)
         {
@@ -13,9 +23,8 @@ export class Texture
         this.id = textureId;
 
         this.src = filename;
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([1,1,1,1]))
-
         gl.bindTexture(gl.TEXTURE_2D, this.id);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([1,1,1,1]))
 
         var image = new Image();
         image.onload = () =>{

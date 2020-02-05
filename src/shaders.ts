@@ -1,5 +1,5 @@
 import { mat4 } from "gl-matrix";
-import { Texture } from "./texture";
+import { Texture, BaseTexture } from "./texture";
 
 export default class ShaderProgram
 {
@@ -9,10 +9,11 @@ export default class ShaderProgram
 
     modelViewLoc : WebGLUniformLocation | null = null;
     modelViewProjectionLoc : WebGLUniformLocation | null = null;
+    projectionLoc : WebGLUniformLocation | null = null;
 
-    diffuseMap : Texture | null;
+    diffuseMap : BaseTexture | null;
     diffuseMapLoc : WebGLUniformLocation | null;
-    constructor(gl : WebGL2RenderingContext, vertexSource : string, shaderSource : string, diffuseMap? : Texture)
+    constructor(gl : WebGL2RenderingContext, vertexSource : string, shaderSource : string, diffuseMap? : BaseTexture)
     {
         var newVertexShader = gl.createShader(gl.VERTEX_SHADER);
         if(newVertexShader == null)
@@ -55,8 +56,15 @@ export default class ShaderProgram
         gl.attachShader(this.program, this.fragmentShader);
         gl.linkProgram(this.program);
 
+        if(!gl.getProgramParameter(this.program, gl.LINK_STATUS))
+        {
+            console.log(gl.getProgramInfoLog(this.program));
+            throw "Failed to link shader program";
+        }
+
         this.modelViewProjectionLoc =  gl.getUniformLocation(this.program, "modelViewProjection");
         this.modelViewLoc = gl.getUniformLocation(this.program, "modelView");
+        this.projectionLoc = gl.getUniformLocation(this.program, "projection");
 
         
         this.diffuseMap = diffuseMap == undefined ? null : diffuseMap;
@@ -74,16 +82,25 @@ export default class ShaderProgram
         }
     }
 
-    bindUniforms(gl : WebGL2RenderingContext, modelView : mat4, modelViewprojection : mat4)
+    bindUniforms(gl : WebGL2RenderingContext, modelMatrix : mat4, viewMatrix : mat4, projectionMatrix : mat4)
     {
+        var modelView : mat4 = mat4.create();
+        mat4.mul(modelView, viewMatrix, modelMatrix);
+
+        var modelViewProjection : mat4 = mat4.create();
+        mat4.mul(modelViewProjection, projectionMatrix, modelView);
+
         if(this.modelViewProjectionLoc)
         {
-            gl.uniformMatrix4fv(this.modelViewProjectionLoc, false, modelViewprojection);
+            gl.uniformMatrix4fv(this.modelViewProjectionLoc, false, modelViewProjection);
         }
-        
         if(this.modelViewLoc)
         {
             gl.uniformMatrix4fv(this.modelViewLoc, false, modelView);
+        }
+        if(this.projectionLoc)
+        {
+            gl.uniformMatrix4fv(this.projectionLoc, false, projectionMatrix);
         }
     }
 }

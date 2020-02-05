@@ -1,4 +1,4 @@
-import { GunObject, ButtonObject, CubeObject } from "./simpleMesh";
+import { GunObject, ButtonObject, CubeObject, SkyboxExample } from "./simpleMesh";
 import { vec3, mat4 } from "gl-matrix";
 import FlyingCamera from "./flyingCamera";
 
@@ -35,6 +35,8 @@ class Game
     camera : FlyingCamera;
     gun : GunObject;
     cube : CubeObject;
+    skybox : SkyboxExample;
+
     gl : WebGL2RenderingContext;
     button : ButtonObject;
 
@@ -46,6 +48,7 @@ class Game
         this.button = new ButtonObject(gl);
         this.gun = new GunObject(gl);
         this.cube = new CubeObject(gl);
+        this.skybox = new SkyboxExample(gl);
 
         this.gun.move(vec3.fromValues(0, 0, -10 ));
         this.cube.move(vec3.fromValues(4, 4, -15 ));
@@ -75,12 +78,15 @@ class Game
         var view : mat4 = this.camera.getViewMatrix();
         var projection : mat4 = this.camera.getProjectionMatrix();
 
-        this.gl.enable(this.gl.DEPTH_TEST);
         // Set clear color to black, fully opaque
         this.gl.clearColor(0, 0, 0, 1.0);
         // Clear the color buffer with specified clear color
         this.gl.clear(this.gl.COLOR_BUFFER_BIT  | this.gl.DEPTH_BUFFER_BIT);
 
+        this.gl.disable(this.gl.DEPTH_TEST)
+        this.skybox.render(this.gl,mat4.create(),view, projection);
+
+        this.gl.enable(this.gl.DEPTH_TEST);
         this.button.render(this.gl, view, projection);
         this.gun.render(this.gl, view, projection);  
         this.cube.render(this.gl, view, projection);
