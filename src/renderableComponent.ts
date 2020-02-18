@@ -1,5 +1,5 @@
 import { mat4, vec3 } from "gl-matrix";
-import ShaderProgram from "./shaders";
+import ShaderProgram from "./webgl/shaders";
 
 //Has a shader and render function
 //Designed to be combined via compisition with other components inside an object class

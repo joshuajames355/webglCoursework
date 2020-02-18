@@ -1,6 +1,5 @@
 import RenderableComponent from "./renderableComponent";
-import { vec3 } from "gl-matrix";
-import ShaderProgram from "./shaders";
+import ShaderProgram from "./webgl/shaders";
 
 export default class StaticMesh extends RenderableComponent //A base class for meshes
 {

@@ -1,10 +1,10 @@
 import StaticMesh from "./staticMesh";
-import ShaderProgram from "./shaders";
+import ShaderProgram from "./webgl/shaders";
 import { BaseTexture } from "./texture";
 
 
-const fragmentSkyboxSource = require("./shaders/fragmentSkybox.glsl");
-const vertexSkyboxSource = require("./shaders/vertexSkybox.glsl");
+const fragmentSkyboxSource = require("./webgl/shaders/fragmentSkybox.glsl");
+const vertexSkyboxSource = require("./webgl/shaders/vertexSkybox.glsl");
 
 export class Skybox extends StaticMesh
 {
