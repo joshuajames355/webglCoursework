@@ -111,8 +111,7 @@ export class WebGLRenderer
                 var materialTemp = this.materials.get(this.components[x].material.id);
                 if(materialTemp == undefined ) break;
                 material = materialTemp;
-
-                material.program.use(this.gl);
+                
                 materialGlobalStep(this.gl, this.components[x].material, material)
             }
 

@@ -38,6 +38,8 @@ export class WebGLMaterialState
 //run once 
 export function materialGlobalStep(gl : WebGL2RenderingContext, material : Material, state : WebGLMaterialState)
 {
+    state.program.use(gl);
+
     if(material.bDiffuseTexture && material.diffuseTexture)
     {
         if(state.diffuseTexture == null)
@@ -82,15 +84,15 @@ export function materialGlobalStep(gl : WebGL2RenderingContext, material : Mater
             gl.bindTexture(gl.TEXTURE_2D, state.diffuseTexture);
         }
     }
+
+    if(material.bDiffuseConstant && material.diffuseColour)
+    {
+        state.program.bindDiffuseColour(gl, material.diffuseColour);
+    }
 }
 
 //run once per object rendered with the material
 export function materialPreRenderStep(gl : WebGL2RenderingContext, material : Material, state : WebGLMaterialState, camera : Camera, modelMat : mat4)
 {
     state.program.bindUniforms(gl, modelMat, camera.getViewMatrix(), camera.getProjectionMatrix());
-
-    if(material.bDiffuseConstant && material.diffuseColour)
-    {
-        state.program.bindDiffuseColour(gl, material.diffuseColour);
-    }
 }
