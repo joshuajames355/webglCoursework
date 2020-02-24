@@ -22,10 +22,7 @@ export class WebGLRenderer
 
     private materials : Map<number, WebGLMaterialState> = new Map<number, WebGLMaterialState>();   
 
-    private backgroundColourR : number = 0;
-    private backgroundColourG : number = 0;
-    private backgroundColourB : number = 0;
-    private backgroundColourA : number = 1;
+    private backgroundColour : vec4 = vec4.fromValues(0,0,1,1);
 
     private lastFrameTime : number;
 
@@ -69,19 +66,9 @@ export class WebGLRenderer
         }
     }
 
-    setBackgroundColourComponents(r : number, g : number, b : number, a : number)
-    {
-        this.backgroundColourR = r;
-        this.backgroundColourG = g;
-        this.backgroundColourB = b;
-        this.backgroundColourA = a;
-    }
     setBackgroundColour(colour : vec4)
     {
-        this.backgroundColourR = vec4.dot(colour, vec4.fromValues(1,0,0,0));
-        this.backgroundColourG = vec4.dot(colour, vec4.fromValues(0,1,0,0));
-        this.backgroundColourB = vec4.dot(colour, vec4.fromValues(0,0,1,0));
-        this.backgroundColourA = vec4.dot(colour, vec4.fromValues(0,0,0,1));
+        this.backgroundColour = colour;
     }
 
     addObject(object : GameObject)
@@ -122,7 +109,7 @@ export class WebGLRenderer
             x.tick(deltaTime);
         })
 
-        this.gl.clearColor(this.backgroundColourR, this.backgroundColourG, this.backgroundColourB, this.backgroundColourA);
+        this.gl.clearColor(this.backgroundColour[0], this.backgroundColour[1], this.backgroundColour[2], this.backgroundColour[3]);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT| this.gl.DEPTH_BUFFER_BIT);
 
         this.renderSkyBox();
