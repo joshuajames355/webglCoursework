@@ -1,5 +1,5 @@
 import { mat4, vec4 } from "gl-matrix";
-import Texture from "../texture";
+import Texture from "../core/texture";
 
 //type is gl.VERTEX_SHADER, gl.FRAGMENT_SHADER etc
 function createShader(gl : WebGL2RenderingContext, source : string, type : number) : WebGLShader

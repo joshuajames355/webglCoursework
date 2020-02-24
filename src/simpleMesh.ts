@@ -3,7 +3,7 @@ import RenderableComponent from "./core/renderableComponent";
 import GameObject from "./core/object";
 import { Material } from "./core/material";
 import { vec4 } from "gl-matrix";
-import Texture from "./texture";
+import Texture from "./core/texture";
 
 //Contains some example objects and components
 //Objects--------------------------------------------------------------------------
