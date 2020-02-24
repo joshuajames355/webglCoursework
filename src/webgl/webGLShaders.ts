@@ -107,8 +107,4 @@ export default class ShaderProgram
             gl.uniform4fv(this.diffuseConstantLoc, colour);
         }
     }
-    bindDiffuseTexture(gl : WebGL2RenderingContext, tex : WebGLTexture)
-    {
-        gl.bindTexture(gl.TEXTURE_2D, tex);
-    }
 }

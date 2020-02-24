@@ -2,6 +2,7 @@ import { Material } from "../core/material";
 import ShaderProgram from "./webGLShaders";
 import { Camera } from "../core/camera";
 import { mat4 } from "gl-matrix";
+import { isFunction } from "util";
 
 const fragmentSource = require("./shaders/fragment.glsl");
 const vertexSource = require("./shaders/vertex.glsl");
@@ -17,6 +18,10 @@ export function getShaderFromMaterial(gl : WebGL2RenderingContext, material : Ma
     {
         fragmentShader += "#define DIFFUSE_CONSTANT\n";
     }
+    if (material.bDiffuseCubemap)
+    {
+        fragmentShader += "#define DIFFUSE_CUBEMAP\n";
+    }
 
     var vertexShader = "#version 300 es\n";
 
@@ -28,6 +33,7 @@ export class WebGLMaterialState
     program: ShaderProgram;
     diffuseTexture?: WebGLTexture; 
     bDiffuseTextureLoaded : boolean = false;
+    bCubeMapLoaded? : boolean[];
 
     constructor(shader : ShaderProgram)
     {
@@ -35,12 +41,76 @@ export class WebGLMaterialState
     }
 }
 
-//run once 
+//run once , loads textures
 export function materialGlobalStep(gl : WebGL2RenderingContext, material : Material, state : WebGLMaterialState)
 {
     state.program.use(gl);
 
-    if(material.bDiffuseTexture && material.diffuseTexture)
+    //handles diffuse cubemaps
+    if(material.bDiffuseCubemap && material.diffuseCubemap.length == 6)
+    {
+        if(state.diffuseTexture == null)
+        {
+            state.bCubeMapLoaded = [false, false, false, false, false, false];
+
+            var textureId = gl.createTexture();
+            if (textureId == null)
+            {
+                throw "Failed to create Texture";
+            }
+            state.diffuseTexture = textureId;
+
+            gl.bindTexture(gl.TEXTURE_CUBE_MAP, state.diffuseTexture);
+            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
+            var isComplete = true;
+            for(var x : number = 0; x < 6; x++)
+            {
+                if(!material.diffuseCubemap[x].image.complete)
+                {
+                    isComplete = false;
+                    gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X + x, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([1,1,1,1]))
+            
+                }
+                else
+                {
+                    state.bCubeMapLoaded[x] = true;
+                    gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X + x, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, material.diffuseCubemap[x].image);
+                }
+                state.bDiffuseTextureLoaded = isComplete;
+            }
+        }
+        else if(state.bDiffuseTextureLoaded)
+        {
+            gl.bindTexture(gl.TEXTURE_CUBE_MAP, state.diffuseTexture);
+        }    
+        else
+        {
+            gl.bindTexture(gl.TEXTURE_CUBE_MAP, state.diffuseTexture);
+            var isComplete = true;
+
+            if(!state.bCubeMapLoaded) state.bCubeMapLoaded = [false, false, false, false, false, false];
+
+            for(var x : number = 0; x < 6; x++)
+            {
+                if(!material.diffuseCubemap[x].image.complete)
+                {
+                    isComplete = false;
+                }
+                else
+                {
+                    state.bCubeMapLoaded[x] = true;
+                    gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X + x, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, material.diffuseCubemap[x].image);
+                }
+                state.bDiffuseTextureLoaded = isComplete;
+            }
+        }        
+
+    }
+    //handles diffuse map
+    else if(material.bDiffuseTexture && material.diffuseTexture)
     {
         if(state.diffuseTexture == null)
         {
@@ -52,7 +122,7 @@ export function materialGlobalStep(gl : WebGL2RenderingContext, material : Mater
             state.diffuseTexture = textureId;
 
             gl.bindTexture(gl.TEXTURE_2D, state.diffuseTexture);
-            if(material.diffuseTexture.image.complete)
+            if(!material.diffuseTexture.image.complete)
             {
                 gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0,0,255,255]))
             }
@@ -63,7 +133,6 @@ export function materialGlobalStep(gl : WebGL2RenderingContext, material : Mater
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-                gl.bindTexture(gl.TEXTURE_2D, null);
 
                 state.bDiffuseTextureLoaded = true;
             }
@@ -85,6 +154,7 @@ export function materialGlobalStep(gl : WebGL2RenderingContext, material : Mater
         }
     }
 
+    //handles constant colours
     if(material.bDiffuseConstant && material.diffuseColour)
     {
         state.program.bindDiffuseColour(gl, material.diffuseColour);

@@ -12,6 +12,11 @@ out vec4 color;
 	uniform vec4 diffuseConstant;
 #endif
 
+#ifdef DIFFUSE_CUBEMAP
+	uniform samplerCube diffuseMap;
+	in vec3 positionOut;
+#endif
+
 void main()
 {
 	vec4 diffuse;
@@ -22,6 +27,9 @@ void main()
 
 	#ifdef DIFFUSE_CONSTANT
 		diffuse = diffuseConstant;
+	#endif
+	#ifdef DIFFUSE_CUBEMAP
+		diffuse = texture(diffuseMap, normalize(positionOut));;
 	#endif
 
 

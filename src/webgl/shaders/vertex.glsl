@@ -6,9 +6,11 @@ uniform mat4 modelViewProjection; //projection * view * model
 uniform mat4 modelView;
 
 out vec2 uvCoord;
+out vec3 positionOut;
 
 void main()
 {
     gl_Position = modelViewProjection * vec4(position.x, position.y, position.z, 1.0);
+    positionOut = position.xyz;
     uvCoord = uvCoordIN;
 }
