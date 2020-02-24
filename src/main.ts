@@ -1,7 +1,8 @@
-import { GunObject, CubeObject, ButtonObject} from "./simpleMesh";
+import { GunObject, CubeObject, ButtonObject, EXAMPLE_SKYBOX} from "./simpleMesh";
 import { vec3, mat4, vec4 } from "gl-matrix";
 import FlyingCamera from "./core/flyingCamera";
 import { WebGLRenderer } from "./webgl/webGLRenderer";
+import { Material } from "./core/material";
 
 
 function main()
@@ -23,7 +24,6 @@ class Game
     camera : FlyingCamera;
     gun : GunObject;
     cube : CubeObject;
-    //skybox : SkyboxExample;
 
     renderer : WebGLRenderer;
     button : ButtonObject;
@@ -38,7 +38,8 @@ class Game
         this.button = new ButtonObject();
         this.gun = new GunObject();
         this.cube = new CubeObject();
-        //this.skybox = new SkyboxExample(gl);
+
+        this.renderer.setSkybox(Material.createSkybox(EXAMPLE_SKYBOX));
 
         this.gun.move(vec3.fromValues(0, 0, -10 ));
         this.cube.move(vec3.fromValues(4, 4, -15 ));

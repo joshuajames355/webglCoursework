@@ -9,9 +9,9 @@ export class WebGLComponentState
     vao : WebGLBuffer = -1; //Vertice Array Object
 
     hasDoneSetup : boolean = false;
-    parent : GameObject;
+    parent? : GameObject;
 
-    constructor(parent : GameObject)
+    constructor(parent? : GameObject)
     {
         this.parent = parent;
     }

@@ -4,6 +4,8 @@ import { WebGLMaterialState, getShaderFromMaterial, materialPreRenderStep, mater
 import PerspectiveCamera, { Camera } from "../core/camera";
 import { mat4, vec4 } from "gl-matrix";
 import GameObject from "../core/object";
+import { SkyboxComponent } from "./webGLSkybox";
+import { Material } from "../core/material";
 
 export class WebGLRenderer
 {
@@ -12,8 +14,13 @@ export class WebGLRenderer
 
     private componentStates : Map<number, WebGLComponentState> = new Map<number, WebGLComponentState>();
     private camera : Camera = new PerspectiveCamera();
+    
+    private skyboxMat? : Material  = undefined;
+    private skyboxMatState? : WebGLMaterialState = undefined;
+    private skyboxComponent? : SkyboxComponent = undefined;
+    private skyboxState : WebGLComponentState = new WebGLComponentState();
 
-    private materials : Map<number, WebGLMaterialState> = new Map<number, WebGLMaterialState>();
+    private materials : Map<number, WebGLMaterialState> = new Map<number, WebGLMaterialState>();   
 
     private backgroundColourR : number = 0;
     private backgroundColourG : number = 0;
@@ -41,6 +48,27 @@ export class WebGLRenderer
         this.lastFrameTime = (new Date()).getTime() / 1000;
     }
 
+    setSkybox(skybox : Material)
+    {
+        this.skyboxMat = skybox;
+        this.skyboxComponent = new SkyboxComponent(skybox);
+        this.skyboxMatState = new WebGLMaterialState(getShaderFromMaterial(this.gl, this.skyboxComponent.material))
+    }
+    removeSkybox()
+    {
+        this.skyboxMat = undefined;
+    }
+    renderSkyBox()
+    {
+        if(this.skyboxMat != undefined && this.skyboxComponent != undefined && this.skyboxMatState != undefined)
+        {
+            this.gl.disable(this.gl.DEPTH_TEST);
+            materialGlobalStep(this.gl, this.skyboxMat, this.skyboxMatState);
+            materialPreRenderStep(this.gl, this.skyboxMat, this.skyboxMatState, this.camera, mat4.create());
+            drawComponent(this.gl, this.skyboxState, this.skyboxComponent); 
+        }
+    }
+
     setBackgroundColourComponents(r : number, g : number, b : number, a : number)
     {
         this.backgroundColourR = r;
@@ -48,7 +76,6 @@ export class WebGLRenderer
         this.backgroundColourB = b;
         this.backgroundColourA = a;
     }
-
     setBackgroundColour(colour : vec4)
     {
         this.backgroundColourR = vec4.dot(colour, vec4.fromValues(1,0,0,0));
@@ -97,6 +124,9 @@ export class WebGLRenderer
 
         this.gl.clearColor(this.backgroundColourR, this.backgroundColourG, this.backgroundColourB, this.backgroundColourA);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT| this.gl.DEPTH_BUFFER_BIT);
+
+        this.renderSkyBox();
+
         this.gl.enable(this.gl.DEPTH_TEST);
 
         var prevMaterialId : number = -1;
@@ -115,8 +145,8 @@ export class WebGLRenderer
                 materialGlobalStep(this.gl, this.components[x].material, material)
             }
 
-            var modelMat = mat4.create();
-            mat4.mul(modelMat, this.components[x].getModelMatrix(), state.parent.getModelMatrix())
+            var modelMat = this.components[x].getModelMatrix();
+            if(state.parent) mat4.mul(modelMat, modelMat, state.parent.getModelMatrix());
             
             materialPreRenderStep(this.gl, this.components[x].material, material, this.camera, modelMat);
             drawComponent(this.gl, state, this.components[x]); 

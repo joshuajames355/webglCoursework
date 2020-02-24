@@ -7,8 +7,16 @@ import { isFunction } from "util";
 const fragmentSource = require("./shaders/fragment.glsl");
 const vertexSource = require("./shaders/vertex.glsl");
 
+const fragmentSkyboxSource = require("./shaders/fragmentSkybox.glsl");
+const vertexSkyboxSource = require("./shaders/vertexSkybox.glsl");
+
 export function getShaderFromMaterial(gl : WebGL2RenderingContext, material : Material) : ShaderProgram
 {
+    if(material.bIsSkybox)
+    {
+        return new ShaderProgram(gl, vertexSkyboxSource, fragmentSkyboxSource); 
+    }
+
     var fragmentShader = "#version 300 es\n";
     if (material.bDiffuseTexture)
     {
