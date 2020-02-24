@@ -1,5 +1,5 @@
-import { mat4 } from "gl-matrix";
-import { Texture, BaseTexture } from "../texture";
+import { mat4, vec4 } from "gl-matrix";
+import Texture from "../texture";
 
 //type is gl.VERTEX_SHADER, gl.FRAGMENT_SHADER etc
 function createShader(gl : WebGL2RenderingContext, source : string, type : number) : WebGLShader
@@ -21,7 +21,6 @@ function createShader(gl : WebGL2RenderingContext, source : string, type : numbe
 }
 const createVertexShader = (gl : WebGL2RenderingContext, source : string) => createShader(gl, source, gl.VERTEX_SHADER);
 const createFragmentShader = (gl : WebGL2RenderingContext, source : string) => createShader(gl, source, gl.FRAGMENT_SHADER);
-
 
 //creates a program from two shaders
 function createShaderProgram(gl : WebGL2RenderingContext, vertexShader : WebGLShader, fragmentShader : WebGLShader) : WebGLProgram
@@ -59,9 +58,10 @@ export default class ShaderProgram
     modelViewProjectionLoc : WebGLUniformLocation | null = null;
     projectionLoc : WebGLUniformLocation | null = null;
 
-    diffuseMap : BaseTexture | null;
-    diffuseMapLoc : WebGLUniformLocation | null;
-    constructor(gl : WebGL2RenderingContext, vertexSource : string, fragmentSource : string, diffuseMap? : BaseTexture)
+    diffuseMapLoc : WebGLUniformLocation | null = null;
+    diffuseConstantLoc : WebGLUniformLocation | null = null;
+
+    constructor(gl : WebGL2RenderingContext, vertexSource : string, fragmentSource : string)
     {
         this.program = createShaderProgramFromSource(gl, vertexSource, fragmentSource);
 
@@ -69,19 +69,13 @@ export default class ShaderProgram
         this.modelViewLoc = gl.getUniformLocation(this.program, "modelView");
         this.projectionLoc = gl.getUniformLocation(this.program, "projection");
         
-        this.diffuseMap = diffuseMap == undefined ? null : diffuseMap;
         this.diffuseMapLoc = gl.getUniformLocation(this.program, "diffuseMap");
+        this.diffuseConstantLoc = gl.getUniformLocation(this.program, "diffuseConstant");
     }
 
     use(gl : WebGL2RenderingContext)
     {
         gl.useProgram(this.program);
-        if(this.diffuseMap != null && this.diffuseMapLoc != null){
-            //using texture unit 0 for diffuse maps
-            gl.activeTexture(gl.TEXTURE0);
-            this.diffuseMap.bindTexture();
-            gl.uniform1i(this.diffuseMapLoc, 0);
-        }
     }
 
     bindUniforms(gl : WebGL2RenderingContext, modelMatrix : mat4, viewMatrix : mat4, projectionMatrix : mat4)
@@ -104,5 +98,17 @@ export default class ShaderProgram
         {
             gl.uniformMatrix4fv(this.projectionLoc, false, projectionMatrix);
         }
+    }
+
+    bindDiffuseColour(gl : WebGL2RenderingContext, colour : vec4)
+    {
+        if(this.diffuseConstantLoc)
+        {
+            gl.uniform4fv(this.diffuseConstantLoc, colour);
+        }
+    }
+    bindDiffuseTexture(gl : WebGL2RenderingContext, tex : WebGLTexture)
+    {
+        gl.bindTexture(gl.TEXTURE_2D, tex);
     }
 }

@@ -1,7 +1,13 @@
 import { mat4 } from "gl-matrix";
 import GameObject from "./object";
 
-export default class PerspectiveCamera extends GameObject
+export abstract class Camera extends GameObject
+{
+    abstract getProjectionMatrix() : mat4;
+    abstract getViewMatrix() : mat4;
+}
+
+export default class PerspectiveCamera extends Camera
 {
     protected projectionMatrix : mat4 = mat4.create();
 

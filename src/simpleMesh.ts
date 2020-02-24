@@ -1,51 +1,34 @@
-import Mesh from "./staticMesh";
-import ShaderProgram from "./shaders";
-import RenderObject from "./renderObject";
-import { mat4, vec3 } from "gl-matrix";
-import StaticMesh from "./staticMesh";
-import { Texture } from "./texture";
-import { Skybox } from "./skybox";
+import {componentFromOBJ} from "./core/staticMesh";
+import RenderableComponent from "./core/renderableComponent";
+import GameObject from "./core/object";
+import { Material } from "./core/material";
+import { vec4 } from "gl-matrix";
+import Texture from "./texture";
 
-const fragmentSource = require("./shaders/fragment.glsl");
-const fragmentTextureSource = require("./shaders/fragmentTexture.glsl");
-const vertexSource = require("./shaders/vertex.glsl");
-const gunModel = require("./assets/M82.obj");
 
 //Contains some example objects and components
-
 //Objects--------------------------------------------------------------------------
 
-export class CubeObject extends RenderObject
+export class CubeObject extends GameObject
 {
-    mesh1 : Mesh;
-
-    constructor(gl : WebGL2RenderingContext)
+    constructor()
     {
         super();
 
-        this.mesh1 = new Cube(new ShaderProgram(gl,vertexSource, fragmentSource));
-    }
-
-    render(gl : WebGL2RenderingContext ,viewMatrix : mat4, projectionMatrix : mat4)
-    {
-        this.mesh1.render(gl, this.getModelMatrix(), viewMatrix, projectionMatrix);
+        var material = Material.fromColour(vec4.fromValues(1, 0, 0, 1.0));
+        this.addComponent(new Cube(material));
     }
 }
 
-export class GunObject extends RenderObject
+const gunModel = require("./assets/M82.obj");
+export class GunObject extends GameObject
 {
-    gun : StaticMesh;
-
-    constructor(gl : WebGL2RenderingContext)
+    constructor()
     {
         super();
 
-        this.gun = StaticMesh.fromOBJ(gunModel, new ShaderProgram(gl,vertexSource, fragmentSource));
-    }
-
-    render(gl : WebGL2RenderingContext ,viewMatrix : mat4, projectionMatrix : mat4)
-    {
-        this.gun.render(gl, this.getModelMatrix(), viewMatrix, projectionMatrix);
+        var material = Material.fromColour(vec4.fromValues(1, 0, 0, 1.0));
+        this.addComponent(componentFromOBJ(gunModel, material))
     }
 
     tick(deltatime : number)
@@ -54,28 +37,25 @@ export class GunObject extends RenderObject
     }
 }
 
+
 const buttonModel = require("./assets/Button.obj");
 const buttonTexture = require("./assets/ButtonTexture.png").default;
 
-export class ButtonObject extends RenderObject
+export class ButtonObject extends GameObject
 {
-    button : StaticMesh;
     buttonTexture : Texture;
 
-    constructor(gl : WebGL2RenderingContext)
+    constructor()
     {
         super();
 
-        this.buttonTexture = new Texture(gl, buttonTexture);
-        this.button = StaticMesh.fromOBJ(buttonModel, new ShaderProgram(gl,vertexSource, fragmentTextureSource, this.buttonTexture));
-    }
-
-    render(gl : WebGL2RenderingContext ,viewMatrix : mat4, projectionMatrix : mat4)
-    {
-        this.button.render(gl, this.getModelMatrix(), viewMatrix, projectionMatrix);
+        this.buttonTexture = new Texture(buttonTexture);
+        this.addComponent(componentFromOBJ(buttonModel, Material.fromDiffuseMap(this.buttonTexture)));
     }
 }
 
+
+/*
 const image1 = require("./assets/skybox/skyrender0001.png").default;
 const image2 = require("./assets/skybox/skyrender0002.png").default;
 const image3 = require("./assets/skybox/skyrender0003.png").default;
@@ -92,13 +72,15 @@ export class SkyboxExample extends Skybox
     }
 }
 
+*/
+
 //Components-----------------------------------------------------------------------------------
 
-class Cube extends Mesh
+class Cube extends RenderableComponent
 {
-    constructor(shaderProgram : ShaderProgram)
+    constructor(material : Material)
     {
-        super(shaderProgram);
+        super(material);
 
         this.vertices = [
             0, 0, 0, 0, 0, 0, 0, 0,

@@ -1,4 +1,5 @@
 import { vec3, quat, mat4 } from "gl-matrix";
+import RenderableComponent from "./renderableComponent";
 
 //Any object with a Position.
 export default class GameObject
@@ -11,6 +12,7 @@ export default class GameObject
     protected modelMatInverse : mat4 = mat4.create();
 
     protected hasPosChanged : boolean = true;
+    private components : RenderableComponent[] = [];
 
     protected generateModelMatrix()
     {
@@ -22,6 +24,16 @@ export default class GameObject
     {
 
     }
+
+    addComponent(component : RenderableComponent)
+    {
+        this.components.push(component);
+    }
+    getComponents() : RenderableComponent[]
+    {
+        return this.components;
+    }
+    
     getModelMatrix() : mat4
     {
         if(this.hasPosChanged)
@@ -66,22 +78,25 @@ export default class GameObject
     }
     addAngle(delta : quat)
     {
-        quat.add(this.rotation, this.rotation, delta);
+        quat.mul(this.rotation, this.rotation, delta);
         this.hasPosChanged = true;
-    }
+    }  
     rotateX(degrees : number)
     {
         quat.rotateX(this.rotation, this.rotation, degrees * 0.01745329251);
+        quat.normalize(this.rotation, this.rotation);
         this.hasPosChanged = true;
     }
     rotateY(degrees : number)
     {
         quat.rotateY(this.rotation, this.rotation, degrees * 0.01745329251);
+        quat.normalize(this.rotation, this.rotation);
         this.hasPosChanged = true;
     }
     rotateZ(degrees : number)
     {
         quat.rotateZ(this.rotation, this.rotation, degrees * 0.01745329251);
+        quat.normalize(this.rotation, this.rotation);
         this.hasPosChanged = true;
     }
 }
