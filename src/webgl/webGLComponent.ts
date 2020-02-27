@@ -60,7 +60,7 @@ export function setupObject(gl : WebGL2RenderingContext, state : WebGLComponentS
     gl.enableVertexAttribArray(0);
     //normals
     gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 8*4, 3*4);
-    gl.enableVertexAttribArray(0);
+    gl.enableVertexAttribArray(1);
     //uvs
     gl.vertexAttribPointer(2, 2, gl.FLOAT, false, 8*4, 6*4);
     gl.enableVertexAttribArray(2);

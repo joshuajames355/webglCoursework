@@ -40,7 +40,7 @@ export function componentFromOBJ(objSource : string, material : Material) : Rend
         else if (line.startsWith("vn")) //normal
         {
             //imports a normal
-            var normal = line.substr(2).split(" ").map((x : string) => parseFloat(x));
+            var normal = line.substr(3).split(" ").map((x : string) => parseFloat(x));
             normal.splice(3);
             normal = normal.map((x : number) => isNaN(x) ? 0 : x);
             normals.push(normal);
