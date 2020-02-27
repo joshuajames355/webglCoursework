@@ -11,6 +11,9 @@ export class WebGLComponentState
     hasDoneSetup : boolean = false;
     parent? : GameObject;
 
+    isDrawingNormals : boolean =  false;
+    normal? : WebGLComponentState; 
+
     constructor(parent? : GameObject)
     {
         this.parent = parent;

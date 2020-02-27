@@ -67,7 +67,7 @@ export function materialGlobalStep(gl : WebGL2RenderingContext, material : Mater
             state.diffuseTexture = textureId;
         }
         
-        bindCubeMap(gl, 0, material.diffuseCubemap.map((tex : Texture) => tex.image), state.diffuseTexture, state.bDiffuseTextureLoaded);
+        bindCubeMap(gl, gl.TEXTURE0, material.diffuseCubemap.map((tex : Texture) => tex.image), state.diffuseTexture, state.bDiffuseTextureLoaded);
         state.bDiffuseTextureLoaded = true;
     }
     //handles diffuse map
@@ -83,7 +83,7 @@ export function materialGlobalStep(gl : WebGL2RenderingContext, material : Mater
             state.diffuseTexture = textureId;
         }
 
-        bind2DTexture(gl, 0, material.diffuseTexture.image, state.diffuseTexture, state.bDiffuseTextureLoaded);
+        bind2DTexture(gl, gl.TEXTURE0, material.diffuseTexture.image, state.diffuseTexture, state.bDiffuseTextureLoaded);
         state.bDiffuseTextureLoaded = true;
     }
 

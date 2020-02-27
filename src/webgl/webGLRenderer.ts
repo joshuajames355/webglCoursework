@@ -6,6 +6,8 @@ import { mat4, vec4 } from "gl-matrix";
 import GameObject from "../core/object";
 import { SkyboxComponent } from "./webGLSkybox";
 import { Material } from "../core/material";
+import ShaderProgram from "./webGLShaders";
+import { generateNormalShader, drawNormals } from "./webGLDebug";
 
 export class WebGLRenderer
 {
@@ -20,7 +22,10 @@ export class WebGLRenderer
     private skyboxComponent? : SkyboxComponent = undefined;
     private skyboxState : WebGLComponentState = new WebGLComponentState();
 
-    private materials : Map<number, WebGLMaterialState> = new Map<number, WebGLMaterialState>();   
+    private materials : Map<number, WebGLMaterialState> = new Map<number, WebGLMaterialState>();  
+
+    private bDrawNormals : boolean = false; //if true, draw normals globally 
+    private normalShader? : ShaderProgram;
 
     private backgroundColour : vec4 = vec4.fromValues(0,0,1,1);
 
@@ -43,6 +48,13 @@ export class WebGLRenderer
 
         this.gl = gl;
         this.lastFrameTime = (new Date()).getTime() / 1000;
+
+        console.log(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS.toString() + " Texture Units avaliable.");
+    }
+
+    setDebugDrawNormals(bDrawNormals : boolean)
+    {
+        this.bDrawNormals = bDrawNormals;
     }
 
     setSkybox(skybox : Material)
@@ -138,5 +150,28 @@ export class WebGLRenderer
             materialPreRenderStep(this.gl, this.components[x].material, material, this.camera, modelMat);
             drawComponent(this.gl, state, this.components[x]); 
         }
+
+        if(this.bDrawNormals)
+        {
+            if(!this.normalShader)
+            {
+                this.normalShader = generateNormalShader(this.gl);
+            }
+            this.normalShader.use(this.gl);
+            this.normalShader.bindDiffuseColour(this.gl, vec4.fromValues(0,1,0,1));
+
+            for(var x : number = 0; x < this.components.length; x++)
+            {
+                var state = this.componentStates.get(this.components[x].id);
+                if(state == undefined) break;
+
+                var modelMat = this.components[x].getModelMatrix();
+                if(state.parent) mat4.mul(modelMat, modelMat, state.parent.getModelMatrix());
+
+                this.normalShader.bindUniforms(this.gl, modelMat, this.camera.getViewMatrix(), this.camera.getProjectionMatrix());
+                drawNormals(this.gl, this.components[x], state);
+            }
+        }
+    
     }
 }
