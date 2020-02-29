@@ -1,4 +1,4 @@
-import { mat4, vec4 } from "gl-matrix";
+import { mat4, vec4, vec3, mat3 } from "gl-matrix";
 import Texture from "../core/texture";
 
 //type is gl.VERTEX_SHADER, gl.FRAGMENT_SHADER etc
@@ -15,6 +15,8 @@ function createShader(gl : WebGL2RenderingContext, source : string, type : numbe
     if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
     {
         console.log(gl.getShaderInfoLog(shader));
+        console.log("Shader Failed: ")
+        console.log(source);
         throw "Failed to compile shader";
     }
     return shader;
@@ -61,6 +63,8 @@ export default class ShaderProgram
     diffuseMapLoc : WebGLUniformLocation | null = null;
     diffuseConstantLoc : WebGLUniformLocation | null = null;
 
+    lightPosLoc : WebGLUniformLocation | null = null;
+    normalMatrixLoc : WebGLUniformLocation | null = null; 
     constructor(gl : WebGL2RenderingContext, vertexSource : string, fragmentSource : string)
     {
         this.program = createShaderProgramFromSource(gl, vertexSource, fragmentSource);
@@ -71,6 +75,9 @@ export default class ShaderProgram
         
         this.diffuseMapLoc = gl.getUniformLocation(this.program, "diffuseMap");
         this.diffuseConstantLoc = gl.getUniformLocation(this.program, "diffuseConstant");
+        
+        this.lightPosLoc = gl.getUniformLocation(this.program, "lightPos");
+        this.normalMatrixLoc = gl.getUniformLocation(this.program, "normalMatrix");
     }
 
     use(gl : WebGL2RenderingContext)
@@ -97,6 +104,23 @@ export default class ShaderProgram
         if(this.projectionLoc)
         {
             gl.uniformMatrix4fv(this.projectionLoc, false, projectionMatrix);
+        }
+        if(this.lightPosLoc)
+        {
+            var lightPos = vec4.fromValues(2, 2, -3, 1);
+            vec4.transformMat4(lightPos, lightPos, viewMatrix);
+            gl.uniform3fv(this.lightPosLoc, vec3.fromValues(lightPos[0], lightPos[1], lightPos[2]));
+        }
+        if(this.normalMatrixLoc)
+        {
+            //mat3(transpose(inverse(modelView)))
+            var output = mat4.create();
+            mat4.invert(output, modelView);
+            mat4.transpose(output, output);
+            var outputMat3 = mat3.create();
+            mat3.fromMat4(outputMat3, output);
+
+            gl.uniformMatrix3fv(this.normalMatrixLoc, false, outputMat3);
         }
     }
 
