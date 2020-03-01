@@ -53,6 +53,16 @@ export default class GameObject
         return this.modelMatInverse; 
     }
 
+    setScale(scale : number)
+    {
+        this.scale = vec3.fromValues(scale, scale, scale);
+        this.hasPosChanged = true;
+    }
+    setScaleVector(scale : vec3)
+    {
+        this.scale = scale;
+        this.hasPosChanged = true;
+    }
     setPosition(newPos : vec3)
     {
         this.position = newPos;
