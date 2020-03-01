@@ -1,5 +1,5 @@
 
-export function bindTexture(gl : WebGL2RenderingContext, textureUnit : number, image: HTMLImageElement, textureID : WebGLTexture, type: number, bindingPoint: number, hasSetup : boolean)
+export function bindTexture(gl : WebGL2RenderingContext, textureUnit : number, image: HTMLImageElement, textureID : WebGLTexture, type: number, hasSetup : boolean)
 {
     gl.activeTexture(textureUnit);
     gl.bindTexture(type, textureID);
@@ -9,6 +9,8 @@ export function bindTexture(gl : WebGL2RenderingContext, textureUnit : number, i
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0,0,255,255]));
         image.onload = () =>
         {
+            gl.activeTexture(textureUnit);
+            
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
 
             gl.texParameteri(type, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -21,7 +23,7 @@ export function bindTexture(gl : WebGL2RenderingContext, textureUnit : number, i
 
 export function bind2DTexture(gl : WebGL2RenderingContext, textureUnit : number, image: HTMLImageElement, textureID : WebGLTexture, hasSetup : boolean)
 {
-    bindTexture(gl, textureUnit, image, textureID, gl.TEXTURE_2D, gl.TEXTURE_2D, hasSetup);
+    bindTexture(gl, textureUnit, image, textureID, gl.TEXTURE_2D, hasSetup);
 }
 
 export function bindCubeMap(gl : WebGL2RenderingContext, textureUnit : number, images: HTMLImageElement[], textureID : WebGLTexture, hasSetup : boolean)
@@ -42,6 +44,7 @@ export function bindCubeMap(gl : WebGL2RenderingContext, textureUnit : number, i
                 gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X + x, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([1,1,1,1]))
                 images[x].onload = () =>
                 {
+                    gl.activeTexture(textureUnit);
                     gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X + x, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, images[x]);
                 }
             }

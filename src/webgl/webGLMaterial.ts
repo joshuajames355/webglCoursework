@@ -32,6 +32,15 @@ export function getShaderFromMaterial(gl : WebGL2RenderingContext, material : Ma
         fragmentShader += "#define DIFFUSE_CUBEMAP\n";
     }
 
+    if (material.bSpecularConstant)
+    {
+        fragmentShader += "#define SPECULAR_CONSTANT\n";
+    }
+    if (material.bSpecularMap)
+    {
+        fragmentShader += "#define SPECULAR_MAP\n";
+    }
+
     var vertexShader = "#version 300 es\n";
 
     return new ShaderProgram(gl, vertexShader + vertexSource, fragmentShader + fragmentSource);
@@ -41,7 +50,10 @@ export class WebGLMaterialState
 {
     program: ShaderProgram;
     diffuseTexture?: WebGLTexture; 
+    specularTexture?: WebGLTexture;
+
     bDiffuseTextureLoaded : boolean = false;
+    bSpecularTextureLoaded : boolean = false;
 
     constructor(shader : ShaderProgram)
     {
@@ -86,11 +98,32 @@ export function materialGlobalStep(gl : WebGL2RenderingContext, material : Mater
         bind2DTexture(gl, gl.TEXTURE0, material.diffuseTexture.image, state.diffuseTexture, state.bDiffuseTextureLoaded);
         state.bDiffuseTextureLoaded = true;
     }
+    //handles specular map
+    if(material.bSpecularMap && material.specularTexture)
+    {
+        if(state.specularTexture == null)
+        {
+            var textureId = gl.createTexture();
+            if (textureId == null)
+            {
+                throw "Failed to create Texture";
+            }
+            state.specularTexture = textureId;
+        }
+
+        bind2DTexture(gl, gl.TEXTURE1, material.specularTexture.image, state.specularTexture, state.bSpecularTextureLoaded);
+        state.bSpecularTextureLoaded = true;
+    }
 
     //handles constant colours
     if(material.bDiffuseConstant && material.diffuseColour)
     {
         state.program.bindDiffuseColour(gl, material.diffuseColour);
+    }
+    //handles specular constant
+    if(material.bSpecularConstant && material.specularConsant)
+    {
+        state.program.bindSpecularConstant(gl, material.specularConsant);
     }
 }
 

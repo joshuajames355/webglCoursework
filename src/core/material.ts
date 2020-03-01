@@ -13,12 +13,31 @@ export class Material
     bDiffuseCubemap : boolean = false;
     diffuseCubemap : Texture[] = [];
 
+    bSpecularConstant : boolean = true;
+    specularConsant : number = 1;
+
+    bSpecularMap : boolean = false;
+    specularTexture? : Texture;
+
     bIsSkybox : boolean = false;
 
     id: number; //used by the renderer
     constructor()
     {
         this.id = Math.floor(Math.random() * 2147483647);
+    }
+
+    setSpecularMap(tex : Texture)
+    {
+        this.bSpecularConstant = false;
+        this.bSpecularMap = true;
+        this.specularTexture = tex;
+    }
+    setSpecularConstant(num : number)
+    {
+        this.bSpecularConstant = true;
+        this.bSpecularMap = false;
+        this.specularConsant = num;
     }
 
     setDiffuseColourVec4(colour : vec4)
@@ -36,7 +55,7 @@ export class Material
         return result;
     }
 
-    setDiffuseTexture(tex : Texture)
+    setDiffuseMap(tex : Texture)
     {
         this.bDiffuseConstant = false;
         this.bDiffuseTexture = true;
@@ -47,7 +66,7 @@ export class Material
     static fromDiffuseMap(tex : Texture)
     {
         var result = new Material();
-        result.setDiffuseTexture(tex);
+        result.setDiffuseMap(tex);
         return result;
     }
 
@@ -68,6 +87,13 @@ export class Material
     {
         var result = new Material();
         result.setDiffuseCubemap(tex);
+        return result;
+    }
+    static fromDiffuseSpecular(diffuse : Texture, specular : Texture)
+    {
+        var result = new Material();
+        result.setDiffuseMap(diffuse);
+        result.setSpecularMap(specular);
         return result;
     }
     static createSkybox(tex : Texture[])

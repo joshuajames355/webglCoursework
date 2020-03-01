@@ -63,11 +63,15 @@ export default class ShaderProgram
     diffuseMapLoc : WebGLUniformLocation | null = null;
     diffuseConstantLoc : WebGLUniformLocation | null = null;
 
+    specularMapLoc : WebGLUniformLocation | null = null;
+    specularConstantLoc : WebGLUniformLocation | null = null;
+
     lightPosLoc : WebGLUniformLocation | null = null;
     normalMatrixLoc : WebGLUniformLocation | null = null; 
     constructor(gl : WebGL2RenderingContext, vertexSource : string, fragmentSource : string)
     {
         this.program = createShaderProgramFromSource(gl, vertexSource, fragmentSource);
+        gl.useProgram(this.program)
 
         this.modelViewProjectionLoc =  gl.getUniformLocation(this.program, "modelViewProjection");
         this.modelViewLoc = gl.getUniformLocation(this.program, "modelView");
@@ -75,6 +79,17 @@ export default class ShaderProgram
         
         this.diffuseMapLoc = gl.getUniformLocation(this.program, "diffuseMap");
         this.diffuseConstantLoc = gl.getUniformLocation(this.program, "diffuseConstant");
+        if(this.diffuseMapLoc)
+        {
+            gl.uniform1i(this.diffuseMapLoc, 0);
+        }
+
+        this.specularMapLoc = gl.getUniformLocation(this.program, "specularMap");
+        this.specularConstantLoc = gl.getUniformLocation(this.program, "specularConstant");
+        if(this.specularMapLoc)
+        {
+            gl.uniform1i(this.specularMapLoc, 1);
+        }
         
         this.lightPosLoc = gl.getUniformLocation(this.program, "lightPos");
         this.normalMatrixLoc = gl.getUniformLocation(this.program, "normalMatrix");
@@ -129,6 +144,13 @@ export default class ShaderProgram
         if(this.diffuseConstantLoc)
         {
             gl.uniform4fv(this.diffuseConstantLoc, colour);
+        }
+    }
+    bindSpecularConstant(gl : WebGL2RenderingContext, num : number)
+    {
+        if(this.specularConstantLoc)
+        {
+            gl.uniform1f(this.specularConstantLoc, num);
         }
     }
 }
