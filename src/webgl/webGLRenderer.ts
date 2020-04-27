@@ -110,6 +110,11 @@ export class WebGLRenderer
         this.camera = camera;
     }
 
+    getDeltaTime()
+    {
+        return (new Date()).getTime() / 1000 - this.lastFrameTime;
+    }
+
     render()
     {
         var time = (new Date()).getTime() / 1000;
