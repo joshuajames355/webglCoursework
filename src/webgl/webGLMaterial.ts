@@ -40,6 +40,10 @@ export function getShaderFromMaterial(gl : WebGL2RenderingContext, material : Ma
     {
         fragmentShader += "#define SPECULAR_MAP\n";
     }
+    if (material.bTileTexures)
+    {
+        fragmentShader += "#define TILE_TEXTURES\n";
+    }
 
     var vertexShader = "#version 300 es\n";
 
@@ -131,4 +135,5 @@ export function materialGlobalStep(gl : WebGL2RenderingContext, material : Mater
 export function materialPreRenderStep(gl : WebGL2RenderingContext, material : Material, state : WebGLMaterialState, camera : Camera, modelMat : mat4)
 {
     state.program.bindUniforms(gl, modelMat, camera.getViewMatrix(), camera.getProjectionMatrix());
+    state.program.bindTileConstants(gl, material.tileTexturesX, material.tileTexturesY);    
 }

@@ -31,15 +31,20 @@ out vec4 color;
 	uniform mat3 normalMatrix; 
 #endif
 
-void lightingPass(vec4 diffuse)
+#ifdef TILE_TEXTURES
+	uniform float tileX;
+	uniform float tileY;
+#endif
+
+void lightingPass(vec4 diffuse, vec2 texCoords)
 {
-	float ambientStrength = 0.05;
+	float ambientStrength = 0.1;
 	float diffuseStrength = 0.7;
 
 	vec3 lightColour = vec3(1,1,1);
 
 	#ifdef NORMAL_MAP
-		vec3 normal = normalMatrix * normalize(texture(normalMap, vec2(uvCoord.x,1.0f- uvCoord.y)).rgb * 2.0 - 1.0);
+		vec3 normal = normalMatrix * normalize(texture(normalMap, texCoords).rgb * 2.0 - 1.0);
 	#else
 		vec3 normal = normalize(normalOut);
 	#endif
@@ -50,7 +55,7 @@ void lightingPass(vec4 diffuse)
 
 	float specularTerm = pow(max(dot(reflect(-lightDir, normal), -normalize(positionOutViewSpace)), 0.0 ), 256.0);
 	#ifdef SPECULAR_MAP
-		vec3 specular = texture(specularMap, vec2(uvCoord.x,1.0f- uvCoord.y)).xyz * specularTerm * lightColour;
+		vec3 specular = texture(specularMap, texCoords).xyz * specularTerm * lightColour;
 	#else
 	# ifdef SPECULAR_CONSTANT
 		vec3 specular = specularConstant * lightColour * specularTerm;
@@ -64,8 +69,18 @@ void lightingPass(vec4 diffuse)
 
 void main()
 {
+	#ifdef TILE_TEXTURES
+		float i;
+		vec2 texCoords = vec2(
+			modf(uvCoord.x * tileX, i), 
+			modf((1.0f - uvCoord.y) * tileY, i)
+		);
+	#else
+		vec2 texCoords = vec2(uvCoord.x, 1.0f- uvCoord.y);
+	#endif
+
 	#ifdef DIFFUSE_MAP
-		 vec4 diffuse = texture(diffuseMap, vec2(uvCoord.x,1.0f- uvCoord.y));
+		vec4 diffuse = texture(diffuseMap, texCoords);
 	#else 
 	# ifdef DIFFUSE_CONSTANT
 		vec4 diffuse = diffuseConstant;
@@ -81,7 +96,7 @@ void main()
 	#ifdef SKIP_LIGHTING
 		color = diffuse;
 	#else
-		lightingPass(diffuse);
+		lightingPass(diffuse, texCoords);
 	#endif
 
 }

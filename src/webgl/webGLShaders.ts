@@ -68,6 +68,10 @@ export default class ShaderProgram
 
     lightPosLoc : WebGLUniformLocation | null = null;
     normalMatrixLoc : WebGLUniformLocation | null = null; 
+
+    tileXLoc : WebGLUniformLocation | null = null;
+    tileYLoc : WebGLUniformLocation | null = null;
+
     constructor(gl : WebGL2RenderingContext, vertexSource : string, fragmentSource : string)
     {
         this.program = createShaderProgramFromSource(gl, vertexSource, fragmentSource);
@@ -93,6 +97,9 @@ export default class ShaderProgram
         
         this.lightPosLoc = gl.getUniformLocation(this.program, "lightPos");
         this.normalMatrixLoc = gl.getUniformLocation(this.program, "normalMatrix");
+
+        this.tileXLoc = gl.getUniformLocation(this.program, "tileX");
+        this.tileYLoc = gl.getUniformLocation(this.program, "tileY");
     }
 
     use(gl : WebGL2RenderingContext)
@@ -151,6 +158,17 @@ export default class ShaderProgram
         if(this.specularConstantLoc)
         {
             gl.uniform1f(this.specularConstantLoc, num);
+        }
+    }
+    bindTileConstants(gl : WebGL2RenderingContext, tileX : number, tileY : number)
+    {
+        if(this.tileXLoc)
+        {
+            gl.uniform1f(this.tileXLoc, tileX);
+        }
+        if(this.tileYLoc)
+        {
+            gl.uniform1f(this.tileYLoc, tileY);
         }
     }
 }

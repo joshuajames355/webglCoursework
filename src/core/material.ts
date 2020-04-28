@@ -21,6 +21,10 @@ export class Material
 
     bIsSkybox : boolean = false;
 
+    tileTexturesX = 1; 
+    tileTexturesY = 1;
+    bTileTexures = false;
+
     id: number; //used by the renderer
     constructor()
     {
@@ -102,5 +106,11 @@ export class Material
         result.setDiffuseCubemap(tex);
         result.bIsSkybox = true;
         return result;
+    }
+    enableTiling(x : number, y : number)
+    {
+        this.bTileTexures = true;
+        this.tileTexturesX = x;
+        this.tileTexturesY = y;
     }
 }
