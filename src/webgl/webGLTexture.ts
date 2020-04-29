@@ -10,12 +10,16 @@ export function bindTexture(gl : WebGL2RenderingContext, textureUnit : number, i
         image.onload = () =>
         {
             gl.activeTexture(textureUnit);
+            gl.bindTexture(type, textureID);
             
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
 
             gl.texParameteri(type, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
             gl.texParameteri(type, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
             gl.texParameteri(type, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
+            gl.bindTexture(type, null);
+
         }
         return 
     }

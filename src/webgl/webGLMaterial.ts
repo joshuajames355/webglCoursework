@@ -129,11 +129,12 @@ export function materialGlobalStep(gl : WebGL2RenderingContext, material : Mater
     {
         state.program.bindSpecularConstant(gl, material.specularConsant);
     }
+
+    state.program.bindTileConstants(gl, material.tileTexturesX, material.tileTexturesY);    
 }
 
 //run once per object rendered with the material
 export function materialPreRenderStep(gl : WebGL2RenderingContext, material : Material, state : WebGLMaterialState, camera : Camera, modelMat : mat4)
 {
     state.program.bindUniforms(gl, modelMat, camera.getViewMatrix(), camera.getProjectionMatrix());
-    state.program.bindTileConstants(gl, material.tileTexturesX, material.tileTexturesY);    
 }
