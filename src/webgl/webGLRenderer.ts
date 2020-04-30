@@ -33,6 +33,8 @@ export class WebGLRenderer
 
     gl : WebGL2RenderingContext;
 
+    lastNFrames : number[] = []; //stores time of last 30 frames
+
     constructor(canvas : HTMLCanvasElement)
     {    
         canvas.onclick = () => {
@@ -115,11 +117,20 @@ export class WebGLRenderer
         return (new Date()).getTime() / 1000 - this.lastFrameTime;
     }
 
+    getFPS() : number //gets rolling fps
+    {
+        if (this.lastNFrames.length == 0) return 0;
+        return this.lastNFrames.length/ this.lastNFrames.reduce((a, b) => a+b);
+    }
+
     render()
     {
         var time = (new Date()).getTime() / 1000;
         var deltaTime = time - this.lastFrameTime;
         this.lastFrameTime = time;
+
+        this.lastNFrames.push(deltaTime);
+        this.lastNFrames = this.lastNFrames.slice(-30);
 
         this.objects.forEach((x : GameObject) =>
         {

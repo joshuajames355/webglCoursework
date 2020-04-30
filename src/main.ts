@@ -55,7 +55,15 @@ class Game
 
     onAnimationFrame()
     {
-        this.renderer.render();
+        if(this.renderer.getDeltaTime() > 1/this.fpsCap)
+        {
+            this.renderer.render();
+            var test = document.getElementById("fps");
+            if( test != null)
+            {
+                test.textContent = this.renderer.getFPS().toPrecision(3) + " FPS";
+            }
+        }
 
         requestAnimationFrame(this.onAnimationFrame.bind(this));
     }

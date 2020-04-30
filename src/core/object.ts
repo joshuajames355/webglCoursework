@@ -53,6 +53,12 @@ export default class GameObject
         return this.modelMatInverse; 
     }
 
+    setRotationEuler(pitch : number, roll : number, yaw : number)
+    {
+        quat.fromEuler(this.rotation, pitch, roll, yaw);
+        this.hasPosChanged = true;
+    }
+
     setScale(scale : number)
     {
         this.scale = vec3.fromValues(scale, scale, scale);
@@ -108,5 +114,9 @@ export default class GameObject
         quat.rotateZ(this.rotation, this.rotation, degrees * 0.01745329251);
         quat.normalize(this.rotation, this.rotation);
         this.hasPosChanged = true;
+    }
+    getRotation()
+    {
+        return this.rotation;
     }
 }
