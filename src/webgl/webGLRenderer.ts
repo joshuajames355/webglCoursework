@@ -125,6 +125,7 @@ export class WebGLRenderer
         {
             x.tick(deltaTime);
         })
+        this.camera.tick(deltaTime);
 
         this.gl.clearColor(this.backgroundColour[0], this.backgroundColour[1], this.backgroundColour[2], this.backgroundColour[3]);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT| this.gl.DEPTH_BUFFER_BIT);
@@ -151,7 +152,7 @@ export class WebGLRenderer
 
             var modelMat = this.components[x].getModelMatrix();
             if(state.parent) mat4.mul(modelMat, modelMat, state.parent.getModelMatrix());
-            
+
             materialPreRenderStep(this.gl, this.components[x].material, material, this.camera, modelMat);
             drawComponent(this.gl, state, this.components[x]); 
         }
