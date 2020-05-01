@@ -63,11 +63,16 @@ class Game
             {
                 test.textContent = this.renderer.getFPS().toPrecision(3) + " FPS";
             }
+
+            var normalCheckbox : HTMLInputElement | null = document.getElementById("normal") as HTMLInputElement;
+            if (normalCheckbox != null)
+            {
+                this.renderer.setDebugDrawNormals(normalCheckbox.checked);
+            }
         }
 
         requestAnimationFrame(this.onAnimationFrame.bind(this));
     }
-
 }
 
 window.onload = main;
