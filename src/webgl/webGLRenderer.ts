@@ -2,16 +2,18 @@ import RenderableComponent from "../core/renderableComponent";
 import { WebGLComponentState, drawComponent} from "./webGLComponent";
 import { WebGLMaterialState, getShaderFromMaterial, materialPreRenderStep, materialGlobalStep} from "./webGLMaterial";
 import PerspectiveCamera, { Camera } from "../core/camera";
-import { mat4, vec4 } from "gl-matrix";
+import { mat4, vec4, vec3 } from "gl-matrix";
 import GameObject from "../core/object";
 import { SkyboxComponent } from "./webGLSkybox";
 import { Material } from "../core/material";
 import ShaderProgram from "./webGLShaders";
 import { generateNormalShader, drawNormals } from "./webGLDebug";
+import { Light } from "../core/light";
 
 export class WebGLRenderer
 {
     private components : RenderableComponent[] = []; //sorted by material id
+    private lights : Light[] = [];
     private objects : GameObject[] = [];
 
     private componentStates : Map<number, WebGLComponentState> = new Map<number, WebGLComponentState>();
@@ -63,7 +65,7 @@ export class WebGLRenderer
     {
         this.skyboxMat = skybox;
         this.skyboxComponent = new SkyboxComponent(skybox);
-        this.skyboxMatState = new WebGLMaterialState(getShaderFromMaterial(this.gl, this.skyboxComponent.material))
+        this.skyboxMatState = new WebGLMaterialState(getShaderFromMaterial(this.gl, this.skyboxComponent.material, 0))
     }
     removeSkybox()
     {
@@ -74,7 +76,7 @@ export class WebGLRenderer
         if(this.skyboxMat != undefined && this.skyboxComponent != undefined && this.skyboxMatState != undefined)
         {
             this.gl.disable(this.gl.DEPTH_TEST);
-            materialGlobalStep(this.gl, this.skyboxMat, this.skyboxMatState);
+            materialGlobalStep(this.gl, this.skyboxMat, this.skyboxMatState, [], []);
             materialPreRenderStep(this.gl, this.skyboxMat, this.skyboxMatState, this.camera, mat4.create());
             drawComponent(this.gl, this.skyboxState, this.skyboxComponent); 
         }
@@ -98,13 +100,13 @@ export class WebGLRenderer
             
             this.components.push(component);
             this.componentStates.set(component.id, new WebGLComponentState(object));
-
-            if(!this.materials.has(component.material.id))
-            {
-                var shader = getShaderFromMaterial(this.gl, component.material);
-                this.materials.set(component.material.id, new WebGLMaterialState(shader))
-            }
         })
+
+        object.getLights().forEach((light : Light) =>
+        {
+            this.lights.push(light);
+            this.componentStates.set(light.id, new WebGLComponentState(object));
+        });
     }
 
     setCamera(camera : Camera)
@@ -145,6 +147,25 @@ export class WebGLRenderer
 
         this.gl.enable(this.gl.DEPTH_TEST);
 
+
+        var lightPos : vec3[] = [];
+        this.lights.forEach((light : Light) =>
+        {
+            var modelMat = light.getModelMatrix();
+
+            var state = this.componentStates.get(light.id);
+            if(state == undefined) return;
+
+            if(state.parent) mat4.mul(modelMat, state.parent.getModelMatrix(),  modelMat,);
+
+            var pos : vec4 = vec4.fromValues(0,0,0,1);
+            vec4.transformMat4(pos, pos, modelMat);
+
+            vec4.transformMat4(pos, pos, this.camera.getViewMatrix())
+
+            lightPos.push(vec3.fromValues(pos[0], pos[1], pos[2]));
+        });
+
         var prevMaterialId : number = -1;
         var material : WebGLMaterialState | undefined = undefined;
         for(var x : number = 0; x < this.components.length; x++)
@@ -152,17 +173,23 @@ export class WebGLRenderer
             var state = this.componentStates.get(this.components[x].id);
             if(state == undefined) break;
 
+            if(!this.materials.has(this.components[x].material.id))
+            {
+                var shader = getShaderFromMaterial(this.gl, this.components[x].material, this.lights.length);
+                this.materials.set(this.components[x].material.id, new WebGLMaterialState(shader))
+            }
+
             if(this.components[x].material.id != prevMaterialId || material == undefined)
             {
                 var materialTemp = this.materials.get(this.components[x].material.id);
                 if(materialTemp == undefined ) break;
                 material = materialTemp;
                 
-                materialGlobalStep(this.gl, this.components[x].material, material)
+                materialGlobalStep(this.gl, this.components[x].material, material, this.lights, lightPos)
             }
 
             var modelMat = this.components[x].getModelMatrix();
-            if(state.parent) mat4.mul(modelMat, modelMat, state.parent.getModelMatrix());
+            if(state.parent) mat4.mul(modelMat, state.parent.getModelMatrix(),  modelMat,);
 
             materialPreRenderStep(this.gl, this.components[x].material, material, this.camera, modelMat);
             drawComponent(this.gl, state, this.components[x]); 

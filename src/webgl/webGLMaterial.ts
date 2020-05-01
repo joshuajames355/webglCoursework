@@ -1,9 +1,10 @@
 import { Material } from "../core/material";
 import ShaderProgram from "./webGLShaders";
 import { Camera } from "../core/camera";
-import { mat4 } from "gl-matrix";
+import { mat4, vec3 } from "gl-matrix";
 import { bindTexture, bind2DTexture, bindCubeMap } from "./webGLTexture";
 import Texture from "../core/texture";
+import { Light } from "../core/light";
 
 const fragmentSource = require("./shaders/fragment.glsl");
 const vertexSource = require("./shaders/vertex.glsl");
@@ -11,7 +12,7 @@ const vertexSource = require("./shaders/vertex.glsl");
 const fragmentSkyboxSource = require("./shaders/fragmentSkybox.glsl");
 const vertexSkyboxSource = require("./shaders/vertexSkybox.glsl");
 
-export function getShaderFromMaterial(gl : WebGL2RenderingContext, material : Material) : ShaderProgram
+export function getShaderFromMaterial(gl : WebGL2RenderingContext, material : Material, numLights : number) : ShaderProgram
 {
     if(material.bIsSkybox)
     {
@@ -19,6 +20,7 @@ export function getShaderFromMaterial(gl : WebGL2RenderingContext, material : Ma
     }
 
     var fragmentShader = "#version 300 es\n";
+    fragmentShader += "#define NUM_LIGHTS " + Math.max(1, numLights).toString() + "\n";
     if (material.bDiffuseTexture)
     {
         fragmentShader += "#define DIFFUSE_MAP\n";
@@ -66,7 +68,7 @@ export class WebGLMaterialState
 }
 
 //run once , loads textures
-export function materialGlobalStep(gl : WebGL2RenderingContext, material : Material, state : WebGLMaterialState)
+export function materialGlobalStep(gl : WebGL2RenderingContext, material : Material, state : WebGLMaterialState, lights : Light[], lightsPos : vec3[])
 {
     state.program.use(gl);
 
@@ -130,7 +132,8 @@ export function materialGlobalStep(gl : WebGL2RenderingContext, material : Mater
         state.program.bindSpecularConstant(gl, material.specularConsant);
     }
 
-    state.program.bindTileConstants(gl, material.tileTexturesX, material.tileTexturesY);    
+    state.program.bindTileConstants(gl, material.tileTexturesX, material.tileTexturesY); 
+    state.program.bindLights(gl, lights, lightsPos);
 }
 
 //run once per object rendered with the material

@@ -1,5 +1,6 @@
 import { mat4, vec4, vec3, mat3 } from "gl-matrix";
 import Texture from "../core/texture";
+import { Light } from "../core/light";
 
 //type is gl.VERTEX_SHADER, gl.FRAGMENT_SHADER etc
 function createShader(gl : WebGL2RenderingContext, source : string, type : number) : WebGLShader
@@ -66,11 +67,13 @@ export default class ShaderProgram
     specularMapLoc : WebGLUniformLocation | null = null;
     specularConstantLoc : WebGLUniformLocation | null = null;
 
-    lightPosLoc : WebGLUniformLocation | null = null;
     normalMatrixLoc : WebGLUniformLocation | null = null; 
 
     tileXLoc : WebGLUniformLocation | null = null;
     tileYLoc : WebGLUniformLocation | null = null;
+
+    lightColourLocs : WebGLUniformLocation[] = [];
+    lightPosLocs : WebGLUniformLocation[] = [];
 
     constructor(gl : WebGL2RenderingContext, vertexSource : string, fragmentSource : string)
     {
@@ -95,11 +98,28 @@ export default class ShaderProgram
             gl.uniform1i(this.specularMapLoc, 1);
         }
         
-        this.lightPosLoc = gl.getUniformLocation(this.program, "lightPos");
         this.normalMatrixLoc = gl.getUniformLocation(this.program, "normalMatrix");
 
         this.tileXLoc = gl.getUniformLocation(this.program, "tileX");
         this.tileYLoc = gl.getUniformLocation(this.program, "tileY");
+
+        var i : number = 0;
+        while (true)
+        {
+            var lightPosLoc = gl.getUniformLocation(this.program, "lightArr[" + i.toString() + "].pos")
+            var lightColourLoc = gl.getUniformLocation(this.program, "lightArr[" + i.toString() + "].colour")
+
+            if(lightColourLoc != null && lightPosLoc != null)
+            {
+                this.lightColourLocs.push(lightColourLoc);
+                this.lightPosLocs.push(lightPosLoc);
+                i++;
+            }
+            else
+            {
+                break;
+            }
+        }
     }
 
     use(gl : WebGL2RenderingContext)
@@ -126,12 +146,6 @@ export default class ShaderProgram
         if(this.projectionLoc)
         {
             gl.uniformMatrix4fv(this.projectionLoc, false, projectionMatrix);
-        }
-        if(this.lightPosLoc)
-        {
-            var lightPos = vec4.fromValues(2, 2, -3, 1);
-            vec4.transformMat4(lightPos, lightPos, viewMatrix);
-            gl.uniform3fv(this.lightPosLoc, vec3.fromValues(lightPos[0], lightPos[1], lightPos[2]));
         }
         if(this.normalMatrixLoc)
         {
@@ -169,6 +183,15 @@ export default class ShaderProgram
         if(this.tileYLoc)
         {
             gl.uniform1f(this.tileYLoc, tileY);
+        }
+    }
+
+    bindLights(gl : WebGL2RenderingContext, lights : Light[], lightPos : vec3[])
+    {
+        for (var i : number = 0; i < Math.min(this.lightColourLocs.length, this.lightPosLocs.length, lights.length); i++)
+        {
+            gl.uniform3fv(this.lightColourLocs[i], lights[i].colour);
+            gl.uniform3fv(this.lightPosLocs[i], lightPos[i]);
         }
     }
 }

@@ -4,7 +4,13 @@ in vec2 uvCoord;
 in vec3 normalOut;
 in vec3 positionOutViewSpace;
 
-uniform vec3 lightPos; //in view space
+struct Light
+{
+	vec3 pos;
+	vec3 colour;
+};
+
+uniform Light lightArr[NUM_LIGHTS];
 
 out vec4 color;
 
@@ -38,33 +44,37 @@ out vec4 color;
 
 void lightingPass(vec4 diffuse, vec2 texCoords)
 {
-	float ambientStrength = 0.1;
+	vec3 ambientStrength = vec3(0.1,0.1,0.1);
 	float diffuseStrength = 0.7;
 
-	vec3 lightColour = vec3(1,1,1);
+	vec3 specularFactor = vec3(0,0,0);
+	vec3 diffuseFactor = vec3(0,0,0);
 
 	#ifdef NORMAL_MAP
-		vec3 normal = normalMatrix * normalize(texture(normalMap, texCoords).rgb * 2.0 - 1.0);
+		vec3 normal = normalMatrix * normalize(texture(normalMap, vec2(uvCoord.x,1.0f- uvCoord.y)).rgb * 2.0 - 1.0);
 	#else
 		vec3 normal = normalize(normalOut);
 	#endif
 
-	vec3 lightDir = normalize(lightPos - positionOutViewSpace);//direction from fragment to light, in view space
+	for (int i = 0; i < NUM_LIGHTS; i++)
+	{
+		vec3 lightDir = normalize(lightArr[i].pos - positionOutViewSpace);//direction from fragment to light, in view space
 
-	float diffuseFactor = diffuseStrength * max(dot(lightDir, normal), 0.0 );
+		diffuseFactor += diffuseStrength * max(dot(lightDir, normal), 0.0 ) * lightArr[i].colour;
+		specularFactor += pow(max(dot(reflect(-lightDir, normal), -normalize(positionOutViewSpace)), 0.0 ), 256.0)  * lightArr[i].colour;
+	}
 
-	float specularTerm = pow(max(dot(reflect(-lightDir, normal), -normalize(positionOutViewSpace)), 0.0 ), 256.0);
 	#ifdef SPECULAR_MAP
-		vec3 specular = texture(specularMap, texCoords).xyz * specularTerm * lightColour;
+		vec3 specular = texture(specularMap, texCoords).xyz * specularFactor;
 	#else
 	# ifdef SPECULAR_CONSTANT
-		vec3 specular = specularConstant * lightColour * specularTerm;
+		vec3 specular = specularConstant * specularFactor;
 	# else
-		vec3 specular = lightColour * specularTerm;
+		vec3 specular = specularFactor;
 	# endif
 	#endif
 
-	color = vec4(((ambientStrength + diffuseFactor) * diffuse).xyz + specular, 1.0);
+	color = vec4((vec4(ambientStrength + diffuseFactor, 1) * diffuse).xyz + specular, 1.0);
 }
 
 void main()

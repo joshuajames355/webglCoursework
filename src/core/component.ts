@@ -1,47 +1,28 @@
-import { vec3, quat, mat4 } from "gl-matrix";
-import RenderableComponent from "./renderableComponent";
-import { Light } from "./light";
-import Component from "./component";
+import { mat4, vec3, quat } from "gl-matrix";
 
-//Any object with a Position.
-export default class GameObject
+//Has a shader and render function
+//Designed to be combined via compisition with other components inside an object class
+export default class Component
 {
     private position : vec3 = vec3.create();
     private scale : vec3 = vec3.fromValues(1,1,1);
     private rotation : quat = quat.create();
 
     protected modelMat : mat4 =  mat4.create();
-    protected modelMatInverse : mat4 = mat4.create();
-
     protected hasPosChanged : boolean = true;
-    private components : RenderableComponent[] = [];
 
-    private lights : Light[] = [];
+    id: number; //used by the renderer
+
+    constructor()
+    {
+        this.id = Math.floor(Math.random() * 2147483647);
+    }
 
     protected generateModelMatrix()
     {
         mat4.fromRotationTranslationScale(this.modelMat, this.rotation, this.position, this.scale);
-        mat4.invert(this.modelMatInverse, this.modelMat);
     }
 
-    tick(deltaTime : number)
-    {
-
-    }
-
-    addComponent(component : Component)
-    {
-        if(component instanceof RenderableComponent) this.components.push(component);
-        if(component instanceof Light) this.lights.push(component);
-    }
-    getComponents() : RenderableComponent[]
-    {
-        return this.components;
-    }
-    getLights() : Light[]
-    {
-        return this.lights
-    }    
     getModelMatrix() : mat4
     {
         if(this.hasPosChanged)
@@ -49,24 +30,8 @@ export default class GameObject
             this.generateModelMatrix();
             this.hasPosChanged = false;
         }
-        return this.modelMat;
+        return mat4.clone(this.modelMat);
     }
-    getModelMatrixInverse() : mat4
-    {
-        if(this.hasPosChanged)
-        {
-            this.generateModelMatrix();
-            this.hasPosChanged = false;
-        }
-        return this.modelMatInverse; 
-    }
-
-    setRotationEuler(pitch : number, roll : number, yaw : number)
-    {
-        quat.fromEuler(this.rotation, pitch, roll, yaw);
-        this.hasPosChanged = true;
-    }
-
     setScale(scale : number)
     {
         this.scale = vec3.fromValues(scale, scale, scale);
@@ -82,7 +47,6 @@ export default class GameObject
         this.position = newPos;
         this.hasPosChanged = true;
     }
-
     move(delta : vec3) //moves an object by a set amount
     {
         vec3.add(this.position, this.position, delta);
@@ -122,9 +86,5 @@ export default class GameObject
         quat.rotateZ(this.rotation, this.rotation, degrees * 0.01745329251);
         quat.normalize(this.rotation, this.rotation);
         this.hasPosChanged = true;
-    }
-    getRotation()
-    {
-        return this.rotation;
     }
 }
