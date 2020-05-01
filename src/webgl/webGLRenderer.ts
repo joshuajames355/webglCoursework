@@ -168,7 +168,9 @@ export class WebGLRenderer
 
         var prevMaterialId : number = -1;
         var material : WebGLMaterialState | undefined = undefined;
-        for(var x : number = 0; x < this.components.length; x++)
+        for(var x : number = 0; x < this.components.length; x++) 
+        //components stored in order of material to minimize shader changes
+        // (done in materialGlobalStep)
         {
             var state = this.componentStates.get(this.components[x].id);
             if(state == undefined) break;
@@ -210,7 +212,7 @@ export class WebGLRenderer
                 if(state == undefined) break;
 
                 var modelMat = this.components[x].getModelMatrix();
-                if(state.parent) mat4.mul(modelMat, modelMat, state.parent.getModelMatrix());
+                if(state.parent) mat4.mul(modelMat, state.parent.getModelMatrix(), modelMat);
 
                 this.normalShader.bindUniforms(this.gl, modelMat, this.camera.getViewMatrix(), this.camera.getProjectionMatrix());
                 drawNormals(this.gl, this.components[x], state);

@@ -6,8 +6,8 @@ in vec3 positionOutViewSpace;
 
 struct Light
 {
-	vec3 pos;
-	vec3 colour;
+	vec3 pos; //in view space
+	vec3 colour; //also used as brightness (ie 1,1,1 2x brighter than 0.5,0.5, 0.5)
 };
 
 uniform Light lightArr[NUM_LIGHTS];
